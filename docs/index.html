@@ -253,35 +253,11 @@
 
     @media (max-width: 960px) {
       .group-row { flex-direction: column; }
+      /* En columna, flex-basis:0 + overflow:hidden colapsaba las tarjetas a altura 0 */
+      .group-row .group-card,
+      .group-row .h2h-card { flex: none; width: 100%; }
     }
 
-    /* ── Mobile: standings table compact ── */
-    @media (max-width: 600px) {
-      .standings-table th, .standings-table td {
-        padding: 0.55rem 0.45rem;
-        font-size: 0.78rem;
-      }
-      /* Hide PJ (col 3) and ±J (col 7) — keep #, Jugador, V, D, JG, Pts */
-      .standings-table th:nth-child(3),
-      .standings-table td:nth-child(3),
-      .standings-table th:nth-child(7),
-      .standings-table td:nth-child(7) { display: none; }
-      .player-cell { font-size: 0.8rem; }
-      .pos { width: 24px; height: 24px; font-size: 0.72rem; }
-    }
-
-    /* ── Mobile: h2h table horizontal scroll ── */
-    @media (max-width: 768px) {
-      .h2h-card { overflow-x: auto; }
-    }
-    @media (max-width: 600px) {
-      .h2h-table th, .h2h-table td {
-        padding: 0.4rem 0.45rem;
-        font-size: 0.7rem;
-      }
-      .h2h-table tbody th { min-width: 52px; white-space: nowrap; }
-      .h2h-table thead th { min-width: 40px; white-space: nowrap; }
-    }
 
     .group-card {
       background: var(--card); border: 1px solid var(--border);
@@ -399,7 +375,7 @@
     .h2h-card-header .group-badge { flex-shrink: 0; }
     .h2h-card-header span { font-size: 0.95rem; font-weight: 800; }
 
-    .h2h-wrapper { overflow-x: auto; }
+    .h2h-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
     .h2h-table {
       width: max-content;
@@ -506,6 +482,42 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
+
+    /* ── Mobile: standings table compact ── */
+    @media (max-width: 600px) {
+      .standings-table th, .standings-table td {
+        padding: 0.5rem 0.35rem;
+        font-size: 0.76rem;
+      }
+      /* Hide PJ (3), D (5) y ±J (7) — keep #, Jugador, V, JG, Pts */
+      .standings-table th:nth-child(3),
+      .standings-table td:nth-child(3),
+      .standings-table th:nth-child(5),
+      .standings-table td:nth-child(5),
+      .standings-table th:nth-child(7),
+      .standings-table td:nth-child(7) { display: none; }
+      .standings-table th:nth-child(1) { width: 32px; }
+      .player-cell { font-size: 0.78rem; }
+      .pos { width: 24px; height: 24px; font-size: 0.72rem; }
+      .td-pts { font-size: 0.92rem; }
+      .group-card-header { padding: 0.9rem 1rem; }
+      .group-meta { font-size: 0.68rem; }
+      .h2h-card-header { padding: 0.9rem 1rem; }
+    }
+
+    /* ── Mobile: h2h table horizontal scroll ── */
+    @media (max-width: 768px) {
+      .h2h-card { overflow-x: auto; }
+    }
+    @media (max-width: 600px) {
+      .h2h-table th, .h2h-table td {
+        padding: 0.4rem 0.45rem;
+        font-size: 0.7rem;
+      }
+      .h2h-table tbody th { min-width: 52px; white-space: nowrap; }
+      .h2h-table thead th { min-width: 40px; white-space: nowrap; }
+    }
+
   </style>
 </head>
 <body>
