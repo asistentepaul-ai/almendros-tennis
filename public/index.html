@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎾 Tennis Ranking — Almendros 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #F2EDE4;
+      --bg2: #EBE4D8;
+      --card: #FFFFFF;
+      --card2: #F8F4EE;
+      --border: #DDD5C8;
+      --border2: #C9BFB0;
+      --text: #1C1917;
+      --muted: #78716C;
+      --muted2: #57534E;
+      --clay: #C05621;
+      --clay-light: #ED8936;
+      --clay-bg: rgba(192,86,33,0.08);
+      --clay-border: rgba(192,86,33,0.25);
+      --grass: #276749;
+      --grass-bg: rgba(39,103,73,0.08);
+      --grass-border: rgba(39,103,73,0.25);
+      --ball: #C9D215;
+      --ball-dark: #8D930F;
+      --gold: #D97706;
+      --gold-bg: rgba(217,119,6,0.1);
+      --gold-border: rgba(217,119,6,0.3);
+      --silver: #71717A;
+      --silver-bg: rgba(113,113,122,0.08);
+      --bronze: #B45309;
+      --bronze-bg: rgba(180,83,9,0.08);
+      --red: #B91C1C;
+      --red-bg: rgba(185,28,28,0.08);
+      --red-border: rgba(185,28,28,0.2);
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── HEADER ── */
+    /* ── HERO BANNER ── */
+    .hero-banner {
+      position: relative;
+      width: 100%;
+      /* respeta proporciones naturales ~4.3:1, con techo en pantallas enormes */
+      aspect-ratio: 4.3 / 1;
+      max-height: 360px;
+      /* móvil: mínimo para que se aprecie */
+      min-height: 160px;
+      overflow: hidden;
+    }
+
+    .hero-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* en desktop muestra el centro; en móvil desplaza a la pista (izquierda) */
+      object-position: center center;
+      display: block;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      /* gradiente sutil solo en la parte inferior para el subtítulo */
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 50%,
+        rgba(0,0,0,0.55) 100%
+      );
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 1.25rem 2rem;
+    }
+
+    .hero-title { display: none; } /* la imagen ya incluye "LOS ALMENDROS" */
+
+    .hero-sub {
+      font-size: 0.85rem; color: rgba(255,255,255,0.9);
+      font-weight: 600; letter-spacing: 0.3px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    }
+
+    @media (max-width: 600px) {
+      .hero-banner img { object-position: 25% center; } /* enfoca la pista en móvil */
+      .hero-overlay { padding: 0.75rem 1rem; }
+      .hero-sub { font-size: 0.75rem; }
+    }
+
+    /* ── STICKY TOP BAR (replaces header) ── */
+    header {
+      background: rgba(120,40,10,0.96);
+      backdrop-filter: blur(8px);
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 4px 11px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: #C9D215; border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+      box-shadow: 0 0 6px #C9D215;
+    }
+
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity: 0.2; } }
+
+    .refresh-info { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+
+    /* ── COURT DECORATION (kept as thin line below topbar) ── */
+    .court-banner { display: none; }
+
+    /* ── MAIN ── */
+    main { max-width: 1380px; margin: 0 auto; padding: 2rem; }
+
+    @media (max-width: 700px) { main { padding: 1rem; } header { padding: 1rem; } }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; gap: 1rem; margin-bottom: 2.5rem;
+      overflow-x: auto; padding-bottom: 4px;
+    }
+
+    .stat-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 0.85rem 1.25rem;
+      white-space: nowrap; flex-shrink: 0;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-icon { font-size: 1.25rem; }
+    .stat-value { font-size: 1.15rem; font-weight: 800; color: var(--clay); }
+    .stat-label { font-size: 0.73rem; color: var(--muted); font-weight: 500; }
+
+    /* ── SECTION TITLE ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--muted2);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .section-title::before {
+      content: ''; display: block;
+      width: 3px; height: 14px;
+      background: linear-gradient(180deg, var(--clay), var(--clay-light));
+      border-radius: 2px;
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--clay), var(--clay-light));
+      color: white; border: none; border-radius: 10px;
+      padding: 8px 16px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+      font-family: inherit; box-shadow: 0 2px 8px rgba(192,86,33,0.3);
+    }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(192,86,33,0.4); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── MATCHES SCROLL ── */
+    .matches-scroll {
+      display: flex; gap: 1rem;
+      overflow-x: auto; padding-bottom: 0.5rem;
+      margin-bottom: 3rem;
+      scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+    }
+
+    .matches-scroll::-webkit-scrollbar { height: 4px; }
+    .matches-scroll::-webkit-scrollbar-track { background: transparent; }
+    .matches-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    .match-card {
+      flex-shrink: 0; min-width: 200px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1rem 1.15rem;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: var(--shadow);
+    }
+
+    .match-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .match-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--clay));
+    }
+
+    .match-group-badge {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 1px;
+      color: var(--clay); text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+
+    .match-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.45rem 0.6rem; border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    .match-row.winner-row { background: var(--grass-bg); }
+
+    .match-player-name {
+      font-size: 0.86rem; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    .match-player-name .crown { font-size: 0.7rem; }
+
+    .match-score-val {
+      font-size: 1.05rem; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .match-row.winner-row .match-score-val { color: var(--grass); }
+    .match-row:not(.winner-row) .match-score-val { color: var(--muted); }
+
+    .match-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 0.6rem;
+    }
+
+    .match-date { font-size: 0.68rem; color: var(--muted); }
+    .match-tb-badge {
+      font-size: 0.6rem; font-weight: 700;
+      background: var(--clay-bg); color: var(--clay);
+      border: 1px solid var(--clay-border);
+      padding: 1px 6px; border-radius: 4px;
+    }
+
+    .no-matches-msg {
+      flex-shrink: 0; min-width: 300px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--card2); border: 1px dashed var(--border);
+      border-radius: 16px; padding: 2rem;
+      color: var(--muted); font-size: 0.9rem;
+    }
+
+    /* ── GROUPS GRID ── */
+    /* cada grupo: clasificación + cruces en fila */
+    .group-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      align-items: flex-start;
+    }
+
+    .group-row .group-card { flex: 1 1 0; min-width: 0; }
+    .group-row .h2h-card   { flex: 1 1 0; min-width: 0; }
+
+    @media (max-width: 960px) {
+      .group-row { flex-direction: column; }
+    }
+
+    .group-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .group-card:hover { border-color: var(--border2); box-shadow: var(--shadow-lg); }
+
+    .group-card-header {
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .group-name {
+      font-size: 1rem; font-weight: 800; letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 8px; color: var(--text);
+    }
+
+    .group-badge {
+      width: 30px; height: 30px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; color: white;
+    }
+
+    .group-meta { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── STANDINGS TABLE ── */
+    .standings-table { width: 100%; border-collapse: collapse; }
+
+    .standings-table thead tr { border-bottom: 1px solid var(--border); background: var(--card2); }
+
+    .standings-table th {
+      font-size: 0.62rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+      padding: 0.65rem 0.9rem; text-align: right;
+    }
+
+    .standings-table th:nth-child(1) { text-align: center; width: 40px; }
+    .standings-table th:nth-child(2) { text-align: left; }
+
+    .standings-table tbody tr {
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      transition: background 0.15s;
+    }
+
+    .standings-table tbody tr:last-child { border-bottom: none; }
+    .standings-table tbody tr:hover td { background: rgba(192,86,33,0.03) !important; }
+
+    .standings-table td {
+      padding: 0.8rem 0.9rem; text-align: right;
+    }
+
+    .standings-table td:nth-child(1) { text-align: center; }
+    .standings-table td:nth-child(2) { text-align: left; }
+
+    .row-1 td { background: rgba(217,119,6,0.04); }
+    .row-last td { background: rgba(185,28,28,0.04); }
+
+    .pos {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 800;
+    }
+    .pos-1 { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
+    .pos-2 { background: var(--silver-bg); color: var(--silver); border: 1px solid rgba(113,113,122,0.25); }
+    .pos-3 { background: var(--bronze-bg); color: var(--bronze); border: 1px solid rgba(180,83,9,0.2); }
+    .pos-4, .pos-5 { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+    .player-cell {
+      font-size: 0.9rem; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .player-cell .you-badge {
+      font-size: 0.58rem; font-weight: 700;
+      background: var(--clay-bg); color: var(--clay);
+      border: 1px solid var(--clay-border);
+      padding: 1px 5px; border-radius: 4px; letter-spacing: 0.5px;
+    }
+
+    .td-pts { font-size: 1rem; font-weight: 800; color: var(--clay); }
+    .td-num { font-size: 0.82rem; color: var(--muted2); font-weight: 500; }
+    .td-num-em { font-size: 0.82rem; font-weight: 700; color: var(--grass); }
+
+    .group-footer {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.68rem; color: var(--muted);
+      background: var(--card2);
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+
+    .promo-badge {
+      font-size: 0.6rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 4px; letter-spacing: 0.4px;
+    }
+    .promo-up { background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); }
+    .promo-down { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+    /* ── HEAD-TO-HEAD SECTION ── */
+    .h2h-section { margin-bottom: 3rem; }
+
+    /* h2h-grid ya no se usa como contenedor separado */
+
+    .h2h-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .h2h-card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card2);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .h2h-card-header .group-badge { flex-shrink: 0; }
+    .h2h-card-header span { font-size: 0.95rem; font-weight: 800; }
+
+    .h2h-wrapper { overflow-x: auto; }
+
+    .h2h-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .h2h-table th, .h2h-table td {
+      padding: 0.5rem 0.6rem;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .h2h-table thead th {
+      background: var(--card2);
+      font-size: 0.68rem; font-weight: 700;
+      color: var(--muted2); letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .h2h-table thead th:first-child {
+      text-align: left;
+      min-width: 80px;
+    }
+
+    .h2h-table tbody th {
+      text-align: left;
+      font-weight: 600; color: var(--text);
+      background: var(--card2);
+      white-space: nowrap;
+      padding-right: 1rem;
+    }
+
+    .h2h-table .cell-self {
+      background: var(--bg2);
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .h2h-table .cell-win {
+      background: var(--grass-bg);
+      color: var(--grass);
+      font-weight: 700;
+    }
+
+    .h2h-table .cell-loss {
+      background: var(--red-bg);
+      color: var(--red);
+      font-weight: 600;
+    }
+
+    .h2h-table .cell-pending {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ── SCORING LEGEND ── */
+    .scoring-legend {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.78rem; color: var(--muted2); font-weight: 500;
+    }
+
+    .legend-badge {
+      font-size: 0.72rem; font-weight: 800;
+      padding: 2px 8px; border-radius: 5px;
+    }
+
+    .legend-badge.win { background: var(--grass-bg); color: var(--grass); border: 1px solid var(--grass-border); }
+    .legend-badge.loss { background: var(--clay-bg); color: var(--clay); border: 1px solid var(--clay-border); }
+    .legend-badge.wo { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      z-index: 200; padding: 1rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 1.75rem;
+      width: 100%; max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-title {
+      font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 8px; color: var(--text);
+    }
+
+    .modal-subtitle { font-size: 0.82rem; color: var(--muted2); margin-bottom: 1.5rem; }
+
+    .modal textarea {
+      width: 100%; padding: 0.9rem 1rem;
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 12px;
+      font-family: inherit; font-size: 0.95rem;
+      resize: none; min-height: 90px;
+      transition: border-color 0.2s; outline: none;
+    }
+
+    .modal textarea:focus { border-color: var(--clay); }
+    .modal textarea::placeholder { color: var(--muted); }
+
+    .modal-examples {
+      margin-top: 0.75rem; margin-bottom: 1.25rem;
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+
+    .example-chip {
+      font-size: 0.72rem; color: var(--muted2);
+      background: var(--card2); border: 1px solid var(--border);
+      padding: 3px 9px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .example-chip:hover { border-color: var(--clay); color: var(--clay); }
+
+    .modal-actions { display: flex; gap: 0.75rem; }
+
+    .btn-cancel {
+      flex: 1; padding: 0.75rem; border: 1px solid var(--border);
+      background: transparent; color: var(--muted2);
+      border-radius: 10px; font-family: inherit; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-cancel:hover { background: var(--card2); color: var(--text); }
+
+    .btn-save {
+      flex: 2; padding: 0.75rem;
+      background: linear-gradient(135deg, var(--clay), var(--clay-light));
+      color: white; border: none; border-radius: 10px;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .modal-result {
+      margin-top: 1rem; padding: 0.9rem 1rem;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+      display: none;
+    }
+
+    .modal-result.success {
+      background: var(--grass-bg); border: 1px solid var(--grass-border);
+      color: var(--grass); display: block;
+    }
+
+    .modal-result.error {
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      color: var(--red); display: block;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 2rem;
+      color: var(--muted); font-size: 0.75rem;
+      border-top: 1px solid var(--border); margin-top: 1rem;
+    }
+
+    footer strong { color: var(--clay); }
+
+    /* ── RACKET DECORATION ── */
+    .racket-deco {
+      opacity: 0.12;
+      position: absolute;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero banner con imagen -->
+<div class="hero-banner">
+  <img src="/almendros-banner.png" alt="Los Almendros Tennis">
+  <div class="hero-overlay">
+    <div class="hero-title">🎾 Almendros Tennis</div>
+    <div class="hero-sub">Ranking Tenis Los Almendros 2026</div>
+  </div>
+</div>
+
+<!-- Sticky top bar -->
+<header>
+  <span class="refresh-info" id="last-update">Actualizando...</span>
+  <div class="live-badge"><div class="live-dot"></div> En vivo</div>
+</header>
+
+<main>
+  <!-- Stats bar -->
+  <div class="stats-bar" style="margin-top:1.5rem;" id="stats-bar">
+    <div class="stat-pill"><span class="stat-icon">🎾</span><div><div class="stat-value" id="stat-players">17</div><div class="stat-label">Jugadores</div></div></div>
+    <div class="stat-pill"><span class="stat-icon">🏟️</span><div><div class="stat-value">4</div><div class="stat-label">Grupos</div></div></div>
+    <div class="stat-pill"><span class="stat-icon">🏆</span><div><div class="stat-value" id="stat-matches">0</div><div class="stat-label">Partidos jugados</div></div></div>
+    <div class="stat-pill"><span class="stat-icon">⏳</span><div><div class="stat-value" id="stat-pending">—</div><div class="stat-label">Pendientes</div></div></div>
+  </div>
+
+  <!-- Scoring legend -->
+  <div class="scoring-legend">
+    <strong style="font-size:0.82rem;color:var(--muted2);font-weight:700;">Sistema de puntos:</strong>
+    <div class="legend-item"><span class="legend-badge win">+2 pts</span> Bonus victoria</div>
+    <div class="legend-item"><span class="legend-badge loss">+J</span> Juegos ganados (siempre)</div>
+    <div class="legend-item"><span class="legend-badge wo">0</span> Derrota o no presentado (sin bonus)</div>
+    <div class="legend-item" style="margin-left:auto;font-size:0.72rem;color:var(--muted);">Desempate: dif. juegos → juegos ganados</div>
+  </div>
+
+  <!-- Recent matches -->
+  <div class="section-header">
+    <div class="section-title">Últimos partidos</div>
+    <button class="btn-submit" onclick="openModal()">🎾 Registrar resultado</button>
+  </div>
+  <div class="matches-scroll" id="matches-container">
+    <div class="no-matches-msg">Cargando partidos...</div>
+  </div>
+
+  <!-- Groups: clasificación + cruces por fila -->
+  <div class="section-header" style="margin-top:0.5rem;">
+    <div class="section-title">Clasificaciones y cruces directos</div>
+  </div>
+  <div id="groups-container"></div>
+</main>
+
+<footer>
+  Actualización automática cada 30 segundos · <strong>Almendros Tennis 2026</strong> 🎾
+</footer>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalIfOutside(event)">
+  <div class="modal">
+    <div class="modal-title">🎾 Registrar resultado</div>
+    <div class="modal-subtitle">Escribe el resultado en lenguaje natural</div>
+    <textarea id="result-input" placeholder='Ej: "Pablo ganó a Javi 6-4" o "Chus 7-6(5) Jacobo"' rows="3"></textarea>
+    <div class="modal-examples">
+      <span class="example-chip" onclick="fillExample('Pablo ganó a Javi 6-4')">Pablo ganó a Javi 6-4</span>
+      <span class="example-chip" onclick="fillExample('Chus 7-6(5) Jacobo')">Chus 7-6(5) Jacobo</span>
+      <span class="example-chip" onclick="fillExample('Mario 6 - Jorge 3')">Mario 6 - Jorge 3</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" id="btn-save" onclick="submitResult()">Guardar resultado</button>
+    </div>
+    <div class="modal-result" id="modal-result"></div>
+  </div>
+</div>
+
+<script>
+  const GROUPS = { 1:'GRUPO 1', 2:'GRUPO 2', 3:'GRUPO 3', 4:'GRUPO 4' };
+  const GROUP_COLORS = { 1:'#C05621', 2:'#276749', 3:'#6D28D9', 4:'#1D4ED8' };
+  const GROUP_COLORS_LIGHT = { 1:'#ED8936', 2:'#38A169', 3:'#7C3AED', 4:'#2563EB' };
+  const POS_LABELS = { 1:'🥇', 2:'🥈', 3:'🥉', 4:'4', 5:'5' };
+
+  let allMatches = [];
+  let allStandings = {};
+
+  async function loadData() {
+    try {
+      const [standingsRes, matchesRes] = await Promise.all([
+        fetch('/api/standings'),
+        fetch('/api/matches?limit=30'),
+      ]);
+      allStandings = await standingsRes.json();
+      allMatches = await matchesRes.json();
+      renderAll();
+      updateTimestamp();
+    } catch(e) {
+      console.error('Error cargando datos:', e);
+    }
+  }
+
+  function updateTimestamp() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('last-update').textContent = `Actualizado ${h}:${m}`;
+  }
+
+  function renderAll() {
+    renderStats();
+    renderMatches();
+    renderGroups();
+  }
+
+  function renderStats() {
+    document.getElementById('stat-matches').textContent = allMatches.length;
+    let total = 0;
+    for (const g of Object.values(allStandings)) total += g.length;
+    document.getElementById('stat-players').textContent = total;
+
+    let possible = 0;
+    for (const g of Object.values(allStandings)) {
+      const n = g.length;
+      possible += (n * (n - 1)) / 2;
+    }
+    document.getElementById('stat-pending').textContent = possible - allMatches.length;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2,'0');
+    const mon = String(d.getMonth()+1).padStart(2,'0');
+    return `${day}/${mon}`;
+  }
+
+  function renderMatches() {
+    const container = document.getElementById('matches-container');
+    if (allMatches.length === 0) {
+      container.innerHTML = '<div class="no-matches-msg">Aún no hay partidos registrados 🎾</div>';
+      return;
+    }
+
+    container.innerHTML = allMatches.map(m => {
+      const isP1Winner = m.winner_id === m.player1_id;
+      const score1 = m.player1_games;
+      const score2 = m.player2_games;
+      const tbBadge = m.is_tiebreak ? '<span class="match-tb-badge">TB</span>' : '';
+      const color = GROUP_COLORS[m.group_number] || '#C05621';
+
+      return `
+        <div class="match-card" style="--card-accent:${color}">
+          <div class="match-group-badge" style="color:${color}">${GROUPS[m.group_number] || 'Grupo'}</div>
+          <div class="match-row ${isP1Winner ? 'winner-row' : ''}">
+            <div class="match-player-name">${isP1Winner ? '<span class="crown">🏆</span>' : ''} ${m.player1_name}</div>
+            <div class="match-score-val">${score1}</div>
+          </div>
+          <div class="match-row ${!isP1Winner ? 'winner-row' : ''}">
+            <div class="match-player-name">${!isP1Winner ? '<span class="crown">🏆</span>' : ''} ${m.player2_name}</div>
+            <div class="match-score-val">${score2}</div>
+          </div>
+          <div class="match-footer">
+            <span class="match-date">${formatDate(m.played_at)}</span>
+            ${tbBadge}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderGroups() {
+    const container = document.getElementById('groups-container');
+    container.innerHTML = '';
+
+    // Build H2H lookup once
+    const matchLookup = {};
+    for (const m of allMatches) {
+      const key = `${Math.min(m.player1_id, m.player2_id)}_${Math.max(m.player1_id, m.player2_id)}`;
+      matchLookup[key] = m;
+    }
+
+    for (let g = 1; g <= 4; g++) {
+      const players = allStandings[g] || [];
+      const color = GROUP_COLORS[g];
+      const colorLight = GROUP_COLORS_LIGHT[g];
+      const totalPlayers = players.length;
+      const matchesInGroup = allMatches.filter(m => m.group_number === g).length;
+
+      // — Standings card —
+      const rows = players.map((p, i) => {
+        const pos = i + 1;
+        const isLast = pos === totalPlayers;
+        const isFirst = pos === 1;
+        const rowClass = isFirst ? 'row-1' : (isLast ? 'row-last' : '');
+        const posClass = `pos-${Math.min(pos, 5)}`;
+        const isYou = p.name === 'Pablo';
+        const diff = p.gamesDiff >= 0 ? `+${p.gamesDiff}` : `${p.gamesDiff}`;
+        return `
+          <tr class="${rowClass}">
+            <td><span class="pos ${posClass}">${pos}</span></td>
+            <td><div class="player-cell">${p.name}${isYou ? '<span class="you-badge">TÚ</span>' : ''}</div></td>
+            <td class="td-num">${p.matchesPlayed}</td>
+            <td class="td-num-em">${p.wins}</td>
+            <td class="td-num">${p.losses}</td>
+            <td class="td-num">${p.gamesWon}</td>
+            <td class="td-num" style="font-size:0.78rem;color:${p.gamesDiff >= 0 ? 'var(--grass)' : 'var(--red)'}">${diff}</td>
+            <td class="td-pts">${p.points}</td>
+          </tr>`;
+      }).join('');
+
+      const standingsCard = document.createElement('div');
+      standingsCard.className = 'group-card';
+      standingsCard.innerHTML = `
+        <div class="group-card-header">
+          <div class="group-name">
+            <div class="group-badge" style="background:linear-gradient(135deg,${color},${colorLight})">${g}</div>
+            ${GROUPS[g]}
+          </div>
+          <div class="group-meta">${totalPlayers} jugadores · ${matchesInGroup} partido${matchesInGroup !== 1 ? 's' : ''}</div>
+        </div>
+        <table class="standings-table">
+          <thead><tr>
+            <th>#</th><th>Jugador</th>
+            <th title="Partidos Jugados">PJ</th>
+            <th title="Victorias">V</th>
+            <th title="Derrotas">D</th>
+            <th title="Juegos Ganados">JG</th>
+            <th title="Diferencia de juegos">±J</th>
+            <th title="Puntos">Pts</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted);font-size:0.85rem">Sin partidos aún</td></tr>'}</tbody>
+        </table>
+        <div class="group-footer">
+          <span class="promo-badge promo-up">1º → Torneo final</span>
+          <span class="promo-badge promo-down">Último → Descenso</span>
+          <span style="margin-left:auto">Pts = JG + 2 (V)</span>
+        </div>`;
+
+      // — H2H card —
+      const headerCells = '<th></th>' + players.map(p => `<th title="${p.name}">${p.name.split(' ')[0]}</th>`).join('');
+      const bodyRows = players.map(rowPlayer => {
+        const cells = players.map(colPlayer => {
+          if (rowPlayer.id === colPlayer.id) return '<td class="cell-self">—</td>';
+          const key = `${Math.min(rowPlayer.id, colPlayer.id)}_${Math.max(rowPlayer.id, colPlayer.id)}`;
+          const match = matchLookup[key];
+          if (!match) return '<td class="cell-pending">·</td>';
+          const rowIsP1 = match.player1_id === rowPlayer.id;
+          const myGames  = rowIsP1 ? match.player1_games : match.player2_games;
+          const oppGames = rowIsP1 ? match.player2_games : match.player1_games;
+          const cls = match.winner_id === rowPlayer.id ? 'cell-win' : 'cell-loss';
+          return `<td class="${cls}">${myGames}-${oppGames}</td>`;
+        }).join('');
+        return `<tr><th>${rowPlayer.name.split(' ')[0]}</th>${cells}</tr>`;
+      }).join('');
+
+      const h2hCard = document.createElement('div');
+      h2hCard.className = 'h2h-card';
+      h2hCard.innerHTML = `
+        <div class="h2h-card-header">
+          <div class="group-badge" style="background:linear-gradient(135deg,${color},${colorLight})">${g}</div>
+          <span>Cruces directos</span>
+        </div>
+        <div class="h2h-wrapper">
+          <table class="h2h-table">
+            <thead><tr>${headerCells}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>`;
+
+      // — Row: standings left, h2h right —
+      const row = document.createElement('div');
+      row.className = 'group-row';
+      row.appendChild(standingsCard);
+      row.appendChild(h2hCard);
+      container.appendChild(row);
+    }
+  }
+
+  // ── Modal ──
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.getElementById('result-input').focus();
+    document.getElementById('modal-result').className = 'modal-result';
+    document.getElementById('modal-result').textContent = '';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('result-input').value = '';
+    document.getElementById('modal-result').className = 'modal-result';
+  }
+
+  function closeModalIfOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
+  }
+
+  function fillExample(text) {
+    document.getElementById('result-input').value = text;
+    document.getElementById('result-input').focus();
+  }
+
+  async function submitResult() {
+    const text = document.getElementById('result-input').value.trim();
+    if (!text) return;
+
+    const btn = document.getElementById('btn-save');
+    const resultEl = document.getElementById('modal-result');
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+    resultEl.className = 'modal-result';
+
+    try {
+      const res = await fetch('/api/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, added_by: 'web' }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        resultEl.className = 'modal-result success';
+        resultEl.textContent = `✅ ¡Registrado! ${data.winner} ganó a ${data.loser} · ${data.score} · Grupo ${data.group}`;
+        await loadData();
+        setTimeout(closeModal, 2500);
+      } else {
+        resultEl.className = 'modal-result error';
+        resultEl.textContent = `❌ ${data.error || 'No se pudo interpretar el resultado'}`;
+      }
+    } catch(e) {
+      resultEl.className = 'modal-result error';
+      resultEl.textContent = '❌ Error de conexión. ¿Está el servidor activo?';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar resultado';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('result-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitResult();
+      }
+    });
+  });
+
+  loadData();
+  setInterval(loadData, 30000);
+</script>
+</body>
+</html>

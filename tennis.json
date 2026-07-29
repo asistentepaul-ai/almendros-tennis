@@ -1,0 +1,118 @@
+{
+  "players": [
+    {
+      "id": 1,
+      "name": "Pepe",
+      "group_number": 1
+    },
+    {
+      "id": 2,
+      "name": "Javi",
+      "group_number": 1
+    },
+    {
+      "id": 3,
+      "name": "Raul",
+      "group_number": 1
+    },
+    {
+      "id": 4,
+      "name": "Pablo",
+      "group_number": 1
+    },
+    {
+      "id": 5,
+      "name": "Sergio",
+      "group_number": 2
+    },
+    {
+      "id": 6,
+      "name": "Mario",
+      "group_number": 2
+    },
+    {
+      "id": 7,
+      "name": "Jorge",
+      "group_number": 2
+    },
+    {
+      "id": 8,
+      "name": "Alex",
+      "group_number": 2
+    },
+    {
+      "id": 9,
+      "name": "Chus",
+      "group_number": 3
+    },
+    {
+      "id": 10,
+      "name": "Jacobo",
+      "group_number": 3
+    },
+    {
+      "id": 11,
+      "name": "JJ",
+      "group_number": 3
+    },
+    {
+      "id": 12,
+      "name": "Dani",
+      "group_number": 3
+    },
+    {
+      "id": 13,
+      "name": "Carlos DM",
+      "group_number": 3
+    },
+    {
+      "id": 14,
+      "name": "Carlitos",
+      "group_number": 4
+    },
+    {
+      "id": 15,
+      "name": "Guille",
+      "group_number": 4
+    },
+    {
+      "id": 16,
+      "name": "Juan",
+      "group_number": 4
+    },
+    {
+      "id": 17,
+      "name": "Rober",
+      "group_number": 4
+    }
+  ],
+  "matches": [
+    {
+      "id": 1,
+      "player1_id": 2,
+      "player2_id": 4,
+      "player1_games": 6,
+      "player2_games": 4,
+      "winner_id": 2,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T13:21:22.797Z",
+      "raw_input": "Hola, Javi ganó a Pablo 6-4",
+      "added_by": "Pablo"
+    },
+    {
+      "id": 2,
+      "player1_id": 1,
+      "player2_id": 2,
+      "player1_games": 6,
+      "player2_games": 1,
+      "winner_id": 1,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T13:40:57.790Z",
+      "raw_input": "Pepe ganó a Javi 6-1",
+      "added_by": "web"
+    }
+  ],
+  "nextMatchId": 3
+}
