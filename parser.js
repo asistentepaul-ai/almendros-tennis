@@ -88,20 +88,26 @@ function regexParse(text) {
   return { player1, player2, player1_games, player2_games, is_tiebreak: isTiebreak, tiebreak_score: tbScore };
 }
 
-// AI-enhanced parser (requires ANTHROPIC_API_KEY in env)
+// AI-enhanced parser via OpenRouter
 async function aiParse(text) {
-  if (!process.env.ANTHROPIC_API_KEY) return null;
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null;
+
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4-5-20251001';
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
-      messages: [{
-        role: 'user',
-        content: `Eres un sistema de análisis de resultados de tenis.
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: `Eres un sistema de análisis de resultados de tenis.
 
 Jugadores válidos: ${ALL_PLAYERS.join(', ')}
 
@@ -111,11 +117,13 @@ Responde SOLO con JSON (sin markdown):
 {"player1":"nombre","player2":"nombre","player1_games":N,"player2_games":N,"is_tiebreak":bool,"tiebreak_score":"N" o null}
 
 Si no puedes interpretar, responde: null`,
-      }],
+        }],
+      }),
     });
 
-    const content = response.content[0].text.trim();
-    if (content === 'null') return null;
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+    if (!content || content === 'null') return null;
 
     const parsed = JSON.parse(content);
     if (!parsed?.player1 || !parsed?.player2) return null;
@@ -129,7 +137,7 @@ Si no puedes interpretar, responde: null`,
 
 async function parseMatchResult(text) {
   // Try AI first if key available, regex as fallback
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (process.env.OPENROUTER_API_KEY) {
     const aiResult = await aiParse(text);
     if (aiResult) return aiResult;
   }

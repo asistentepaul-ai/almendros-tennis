@@ -1,6 +1,19 @@
 const TelegramBot = require('node-telegram-bot-api');
+const { exec } = require('child_process');
+const path = require('path');
 const { parseMatchResult } = require('./parser');
-const { findPlayer, findPlayerExact, addMatch, matchExists, getStandings, getRecentMatches } = require('./db');
+const { findPlayer, findPlayerExact, addMatch, deleteMatch, matchExists, getStandings, getRecentMatches, getAllPlayers } = require('./db');
+
+// Pending overwrite requests: chatId -> { matchId, newMatchData, p1, p2, parsed }
+const pendingOverwrites = new Map();
+
+function triggerSync() {
+  const script = path.join(__dirname, 'sync-to-github.sh');
+  exec(`bash "${script}"`, (err, stdout, stderr) => {
+    if (err) console.error('Sync error:', stderr || err.message);
+    else console.log('Sync:', stdout.trim());
+  });
+}
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -39,42 +52,68 @@ function formatRecentMatches(matches) {
   }).join('\n');
 }
 
-async function handleResult(chatId, text, senderName) {
-  const thinking = await bot.sendMessage(chatId, '⏳ Interpretando resultado...');
+function formatExistingMatch(match) {
+  const players = getAllPlayers();
+  const p1 = players.find(p => p.id === match.player1_id);
+  const p2 = players.find(p => p.id === match.player2_id);
+  const winner = match.winner_id === match.player1_id ? p1 : p2;
+  const loser = winner.id === match.player1_id ? p2 : p1;
+  const score = `${match.player1_games}-${match.player2_games}`;
+  const tb = match.is_tiebreak ? ' (TB)' : '';
+  const date = new Date(match.played_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+  return `🏆 *${winner.name}* ganó a *${loser.name}* · ${score}${tb} · [${date}]`;
+}
 
+async function handleResult(chatId, text, senderName) {
+  // Clear any pending overwrite when a new result comes in
+  pendingOverwrites.delete(chatId);
+
+  const thinking = await bot.sendMessage(chatId, '⏳ Interpretando resultado...');
   const parsed = await parseMatchResult(text);
+  bot.deleteMessage(chatId, thinking.message_id).catch(() => {});
 
   if (!parsed) {
-    bot.deleteMessage(chatId, thinking.message_id).catch(() => {});
     return bot.sendMessage(chatId,
-      '❓ No pude interpretar ese resultado. Prueba con:\n• "Pablo ganó a Javi 6-4"\n• "Resultado Chus 7-6 Jacobo"\n• "Mario 6 - Jorge 3"'
+      '❓ No pude interpretar ese resultado.\n\nPrueba con:\n• "Pablo ganó a Javi 6-4"\n• "Resultado Chus 7-6 Jacobo"\n• "Mario 6 - Jorge 3"'
     );
   }
 
   const p1 = findPlayerExact(parsed.player1) || findPlayer(parsed.player1);
   const p2 = findPlayerExact(parsed.player2) || findPlayer(parsed.player2);
 
-  bot.deleteMessage(chatId, thinking.message_id).catch(() => {});
-
   if (!p1 || !p2) {
     const missing = [!p1 && parsed.player1, !p2 && parsed.player2].filter(Boolean).join(' y ');
-    return bot.sendMessage(chatId, `❌ No reconozco al jugador: *${missing}*\nUsa los nombres exactos de la lista.`, { parse_mode: 'Markdown' });
+    return bot.sendMessage(chatId,
+      `❌ Jugador no reconocido: *${missing}*\n\nNombres válidos: Pepe, Javi, Raul, Pablo, Sergio, Mario, Jorge, Alex, Chus, Jacobo, JJ, Dani, Carlos DM, Carlitos, Guille, Juan, Rober`,
+      { parse_mode: 'Markdown' }
+    );
   }
 
   if (p1.group_number !== p2.group_number) {
     return bot.sendMessage(chatId,
-      `❌ *${p1.name}* (Grupo ${p1.group_number}) y *${p2.name}* (Grupo ${p2.group_number}) están en grupos distintos.`,
+      `❌ *${p1.name}* y *${p2.name}* están en grupos distintos (Grupo ${p1.group_number} vs Grupo ${p2.group_number}).\n\nSolo se pueden enfrentar jugadores del mismo grupo.`,
       { parse_mode: 'Markdown' }
     );
   }
 
-  if (matchExists(p1.id, p2.id)) {
+  const existing = matchExists(p1.id, p2.id);
+  if (existing) {
+    pendingOverwrites.set(chatId, {
+      matchId: existing.id,
+      p1, p2, parsed,
+      senderName,
+      raw_input: text,
+    });
     return bot.sendMessage(chatId,
-      `⚠️ Ya hay un resultado entre *${p1.name}* y *${p2.name}*. Contacta al coordinador si hay un error.`,
+      `⚠️ Ya existe un resultado entre *${p1.name}* y *${p2.name}*:\n\n${formatExistingMatch(existing)}\n\n¿Quieres sobrescribirlo con el nuevo resultado?\nResponde /si para confirmar o /no para cancelar.`,
       { parse_mode: 'Markdown' }
     );
   }
 
+  saveMatch({ chatId, p1, p2, parsed, senderName, raw_input: text });
+}
+
+function saveMatch({ chatId, p1, p2, parsed, senderName, raw_input }) {
   addMatch({
     player1_id: p1.id,
     player2_id: p2.id,
@@ -82,20 +121,35 @@ async function handleResult(chatId, text, senderName) {
     player2_games: parsed.player2_games,
     is_tiebreak: parsed.is_tiebreak,
     tiebreak_score: parsed.tiebreak_score,
-    raw_input: text,
+    raw_input,
     added_by: senderName,
   });
+  triggerSync();
 
   const winner = parsed.player1_games > parsed.player2_games ? p1 : p2;
   const loser = winner.id === p1.id ? p2 : p1;
   const score = `${parsed.player1_games}-${parsed.player2_games}`;
-  const tbText = parsed.is_tiebreak ? ` _(tie-break)_` : '';
+  const tbText = parsed.is_tiebreak ? ' _(tie-break)_' : '';
 
   bot.sendMessage(chatId,
     `✅ *Resultado registrado*\n\n🏆 *${winner.name}* ganó a *${loser.name}*\n📊 ${score}${tbText}\n👥 Grupo ${p1.group_number}`,
     { parse_mode: 'Markdown' }
   );
 }
+
+bot.onText(/\/si/, (msg) => {
+  const pending = pendingOverwrites.get(msg.chat.id);
+  if (!pending) return;
+  pendingOverwrites.delete(msg.chat.id);
+  deleteMatch(pending.matchId);
+  saveMatch({ chatId: msg.chat.id, ...pending });
+});
+
+bot.onText(/\/no/, (msg) => {
+  if (!pendingOverwrites.has(msg.chat.id)) return;
+  pendingOverwrites.delete(msg.chat.id);
+  bot.sendMessage(msg.chat.id, '↩️ Operación cancelada. El resultado anterior se mantiene.');
+});
 
 bot.onText(/\/clasificacion/, (msg) => {
   const standings = getStandings();

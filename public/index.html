@@ -668,7 +668,7 @@
   <!-- Recent matches -->
   <div class="section-header">
     <div class="section-title">Últimos partidos</div>
-    <button class="btn-submit" onclick="openModal()">🎾 Registrar resultado</button>
+    <!-- <button class="btn-submit" onclick="openModal()">🎾 Registrar resultado</button> -->
   </div>
   <div class="matches-scroll" id="matches-container">
     <div class="no-matches-msg">Cargando partidos...</div>
@@ -685,7 +685,7 @@
   Actualización automática cada 30 segundos · <strong>Almendros Tennis 2026</strong> 🎾
 </footer>
 
-<!-- Modal -->
+<!-- Modal de registro desactivado — los resultados se introducen por el bot de Telegram
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalIfOutside(event)">
   <div class="modal">
     <div class="modal-title">🎾 Registrar resultado</div>
@@ -703,6 +703,7 @@
     <div class="modal-result" id="modal-result"></div>
   </div>
 </div>
+-->
 
 <script>
   const GROUPS = { 1:'GRUPO 1', 2:'GRUPO 2', 3:'GRUPO 3', 4:'GRUPO 4' };
