@@ -1,0 +1,340 @@
+{
+  "players": [
+    {
+      "id": 1,
+      "name": "Pepe",
+      "group_number": 1
+    },
+    {
+      "id": 2,
+      "name": "Javi",
+      "group_number": 1
+    },
+    {
+      "id": 3,
+      "name": "Raul",
+      "group_number": 1
+    },
+    {
+      "id": 4,
+      "name": "Pablo",
+      "group_number": 1
+    },
+    {
+      "id": 5,
+      "name": "Sergio",
+      "group_number": 2
+    },
+    {
+      "id": 6,
+      "name": "Mario",
+      "group_number": 2
+    },
+    {
+      "id": 7,
+      "name": "Jorge",
+      "group_number": 2
+    },
+    {
+      "id": 8,
+      "name": "Alex",
+      "group_number": 2
+    },
+    {
+      "id": 9,
+      "name": "Chus",
+      "group_number": 3
+    },
+    {
+      "id": 10,
+      "name": "Jacobo",
+      "group_number": 3
+    },
+    {
+      "id": 11,
+      "name": "JJ",
+      "group_number": 3
+    },
+    {
+      "id": 12,
+      "name": "Dani",
+      "group_number": 3
+    },
+    {
+      "id": 13,
+      "name": "Carlos DM",
+      "group_number": 3
+    },
+    {
+      "id": 14,
+      "name": "Carlitos",
+      "group_number": 4
+    },
+    {
+      "id": 15,
+      "name": "Guille",
+      "group_number": 4
+    },
+    {
+      "id": 16,
+      "name": "Juan",
+      "group_number": 4
+    },
+    {
+      "id": 17,
+      "name": "Rober",
+      "group_number": 4
+    }
+  ],
+  "matches": [
+    {
+      "id": 2,
+      "player1_id": 1,
+      "player2_id": 2,
+      "player1_games": 6,
+      "player2_games": 1,
+      "winner_id": 1,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T13:40:57.790Z",
+      "raw_input": "Pepe ganó a Javi 6-1",
+      "added_by": "web",
+      "player1_name": "Pepe",
+      "player2_name": "Javi",
+      "winner_name": "Pepe",
+      "group_number": 1
+    },
+    {
+      "id": 1,
+      "player1_id": 2,
+      "player2_id": 4,
+      "player1_games": 6,
+      "player2_games": 4,
+      "winner_id": 2,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T13:21:22.797Z",
+      "raw_input": "Hola, Javi ganó a Pablo 6-4",
+      "added_by": "Pablo",
+      "player1_name": "Javi",
+      "player2_name": "Pablo",
+      "winner_name": "Javi",
+      "group_number": 1
+    }
+  ],
+  "standings": {
+    "1": [
+      {
+        "id": 2,
+        "name": "Javi",
+        "group_number": 1,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 7,
+        "gamesLost": 10,
+        "gamesDiff": -3,
+        "points": 9
+      },
+      {
+        "id": 1,
+        "name": "Pepe",
+        "group_number": 1,
+        "matchesPlayed": 1,
+        "wins": 1,
+        "losses": 0,
+        "gamesWon": 6,
+        "gamesLost": 1,
+        "gamesDiff": 5,
+        "points": 8
+      },
+      {
+        "id": 4,
+        "name": "Pablo",
+        "group_number": 1,
+        "matchesPlayed": 1,
+        "wins": 0,
+        "losses": 1,
+        "gamesWon": 4,
+        "gamesLost": 6,
+        "gamesDiff": -2,
+        "points": 4
+      },
+      {
+        "id": 3,
+        "name": "Raul",
+        "group_number": 1,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      }
+    ],
+    "2": [
+      {
+        "id": 5,
+        "name": "Sergio",
+        "group_number": 2,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 6,
+        "name": "Mario",
+        "group_number": 2,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 7,
+        "name": "Jorge",
+        "group_number": 2,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 8,
+        "name": "Alex",
+        "group_number": 2,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      }
+    ],
+    "3": [
+      {
+        "id": 9,
+        "name": "Chus",
+        "group_number": 3,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 10,
+        "name": "Jacobo",
+        "group_number": 3,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 11,
+        "name": "JJ",
+        "group_number": 3,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 12,
+        "name": "Dani",
+        "group_number": 3,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 13,
+        "name": "Carlos DM",
+        "group_number": 3,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      }
+    ],
+    "4": [
+      {
+        "id": 14,
+        "name": "Carlitos",
+        "group_number": 4,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 15,
+        "name": "Guille",
+        "group_number": 4,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 16,
+        "name": "Juan",
+        "group_number": 4,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 17,
+        "name": "Rober",
+        "group_number": 4,
+        "matchesPlayed": 0,
+        "wins": 0,
+        "losses": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "gamesDiff": 0,
+        "points": 0
+      }
+    ]
+  },
+  "updatedAt": "2026-07-29T14:55:52.250Z"
+}
