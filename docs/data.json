@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 6,
+      "player1_id": 6,
+      "player2_id": 7,
+      "player1_games": 4,
+      "player2_games": 6,
+      "winner_id": 7,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T20:13:04.022Z",
+      "raw_input": "ayer jugaron Mario y Jorge y gano Jorge 6 a 4",
+      "added_by": "Pablo",
+      "player1_name": "Mario",
+      "player2_name": "Jorge",
+      "winner_name": "Jorge",
+      "group_number": 2
+    },
+    {
       "id": 5,
       "player1_id": 3,
       "player2_id": 1,
@@ -226,32 +243,32 @@
     ],
     "2": [
       {
-        "id": 5,
-        "name": "Sergio",
+        "id": 7,
+        "name": "Jorge",
         "group_number": 2,
-        "matchesPlayed": 0,
-        "wins": 0,
+        "matchesPlayed": 1,
+        "wins": 1,
         "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "gamesWon": 6,
+        "gamesLost": 4,
+        "gamesDiff": 2,
+        "points": 8
       },
       {
         "id": 6,
         "name": "Mario",
         "group_number": 2,
-        "matchesPlayed": 0,
+        "matchesPlayed": 1,
         "wins": 0,
-        "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "losses": 1,
+        "gamesWon": 4,
+        "gamesLost": 6,
+        "gamesDiff": -2,
+        "points": 4
       },
       {
-        "id": 7,
-        "name": "Jorge",
+        "id": 5,
+        "name": "Sergio",
         "group_number": 2,
         "matchesPlayed": 0,
         "wins": 0,
@@ -387,5 +404,5 @@
       }
     ]
   },
-  "updatedAt": "2026-07-29T20:08:35.197Z"
+  "updatedAt": "2026-07-29T20:13:04.104Z"
 }
