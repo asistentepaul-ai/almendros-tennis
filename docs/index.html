@@ -255,6 +255,34 @@
       .group-row { flex-direction: column; }
     }
 
+    /* ── Mobile: standings table compact ── */
+    @media (max-width: 600px) {
+      .standings-table th, .standings-table td {
+        padding: 0.55rem 0.45rem;
+        font-size: 0.78rem;
+      }
+      /* Hide PJ (col 3) and ±J (col 7) — keep #, Jugador, V, D, JG, Pts */
+      .standings-table th:nth-child(3),
+      .standings-table td:nth-child(3),
+      .standings-table th:nth-child(7),
+      .standings-table td:nth-child(7) { display: none; }
+      .player-cell { font-size: 0.8rem; }
+      .pos { width: 24px; height: 24px; font-size: 0.72rem; }
+    }
+
+    /* ── Mobile: h2h table horizontal scroll ── */
+    @media (max-width: 768px) {
+      .h2h-card { overflow-x: auto; }
+    }
+    @media (max-width: 600px) {
+      .h2h-table th, .h2h-table td {
+        padding: 0.4rem 0.45rem;
+        font-size: 0.7rem;
+      }
+      .h2h-table tbody th { min-width: 52px; white-space: nowrap; }
+      .h2h-table thead th { min-width: 40px; white-space: nowrap; }
+    }
+
     .group-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 20px; overflow: hidden;
@@ -374,7 +402,8 @@
     .h2h-wrapper { overflow-x: auto; }
 
     .h2h-table {
-      width: 100%;
+      width: max-content;
+      min-width: 100%;
       border-collapse: collapse;
       font-size: 0.78rem;
     }
@@ -527,7 +556,7 @@
 </main>
 
 <footer>
-  Actualización automática cada 60 segundos · <strong>Almendros Tennis 2026</strong> 🎾<br>
+  Actualización automática cada 5 minutos · <strong>Almendros Tennis 2026</strong> 🎾<br>
   <span style="font-size:0.68rem;margin-top:4px;display:inline-block;">Para registrar resultados: escribe a @Almendros_tenis_bot en Telegram</span>
 </footer>
 
@@ -729,7 +758,7 @@
   }
 
   loadData();
-  setInterval(loadData, 60000);
+  setInterval(loadData, 300000);
 </script>
 </body>
 </html>
