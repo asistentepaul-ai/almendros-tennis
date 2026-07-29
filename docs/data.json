@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 5,
+      "player1_id": 3,
+      "player2_id": 1,
+      "player1_games": 6,
+      "player2_games": 4,
+      "winner_id": 3,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T19:56:03.673Z",
+      "raw_input": "Raul Pepe 6-4",
+      "added_by": "Pablo",
+      "player1_name": "Raul",
+      "player2_name": "Pepe",
+      "winner_name": "Raul",
+      "group_number": 1
+    },
+    {
       "id": 4,
       "player1_id": 3,
       "player2_id": 2,
@@ -162,13 +179,13 @@
         "id": 3,
         "name": "Raul",
         "group_number": 1,
-        "matchesPlayed": 2,
-        "wins": 2,
+        "matchesPlayed": 3,
+        "wins": 3,
         "losses": 0,
-        "gamesWon": 13,
-        "gamesLost": 11,
-        "gamesDiff": 2,
-        "points": 17
+        "gamesWon": 19,
+        "gamesLost": 15,
+        "gamesDiff": 4,
+        "points": 25
       },
       {
         "id": 2,
@@ -183,6 +200,18 @@
         "points": 14
       },
       {
+        "id": 1,
+        "name": "Pepe",
+        "group_number": 1,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 10,
+        "gamesLost": 7,
+        "gamesDiff": 3,
+        "points": 12
+      },
+      {
         "id": 4,
         "name": "Pablo",
         "group_number": 1,
@@ -193,18 +222,6 @@
         "gamesLost": 13,
         "gamesDiff": -3,
         "points": 10
-      },
-      {
-        "id": 1,
-        "name": "Pepe",
-        "group_number": 1,
-        "matchesPlayed": 1,
-        "wins": 1,
-        "losses": 0,
-        "gamesWon": 6,
-        "gamesLost": 1,
-        "gamesDiff": 5,
-        "points": 8
       }
     ],
     "2": [
@@ -370,5 +387,5 @@
       }
     ]
   },
-  "updatedAt": "2026-07-29T19:38:20.537Z"
+  "updatedAt": "2026-07-29T19:56:03.771Z"
 }
