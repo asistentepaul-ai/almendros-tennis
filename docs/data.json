@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 9,
+      "player1_id": 9,
+      "player2_id": 10,
+      "player1_games": 6,
+      "player2_games": 3,
+      "winner_id": 9,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-29T20:27:10.740Z",
+      "raw_input": "Chus y Jacobo quedaron 6-3",
+      "added_by": "Pablo",
+      "player1_name": "Chus",
+      "player2_name": "Jacobo",
+      "winner_name": "Chus",
+      "group_number": 3
+    },
+    {
       "id": 8,
       "player1_id": 4,
       "player2_id": 1,
@@ -313,25 +330,25 @@
         "id": 9,
         "name": "Chus",
         "group_number": 3,
-        "matchesPlayed": 0,
-        "wins": 0,
+        "matchesPlayed": 1,
+        "wins": 1,
         "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "gamesWon": 6,
+        "gamesLost": 3,
+        "gamesDiff": 3,
+        "points": 8
       },
       {
         "id": 10,
         "name": "Jacobo",
         "group_number": 3,
-        "matchesPlayed": 0,
+        "matchesPlayed": 1,
         "wins": 0,
-        "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "losses": 1,
+        "gamesWon": 3,
+        "gamesLost": 6,
+        "gamesDiff": -3,
+        "points": 3
       },
       {
         "id": 11,
@@ -421,5 +438,5 @@
       }
     ]
   },
-  "updatedAt": "2026-07-29T20:17:08.761Z"
+  "updatedAt": "2026-07-29T20:27:10.831Z"
 }
