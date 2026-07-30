@@ -438,5 +438,52 @@
       }
     ]
   },
-  "updatedAt": "2026-07-29T21:39:49.335Z"
+  "highlights": {
+    "1": [
+      {
+        "type": "confirmed_first",
+        "player": "Raul",
+        "text": "Raul está matemáticamente clasificado como primero de grupo."
+      },
+      {
+        "type": "confirmed_last",
+        "player": "Pepe",
+        "text": "Pepe no puede evitar terminar último de grupo."
+      },
+      {
+        "type": "safe",
+        "player": "Pablo",
+        "text": "Pablo ya no puede terminar último de grupo."
+      }
+    ],
+    "2": [],
+    "3": [],
+    "4": []
+  },
+  "highlightsCache": {
+    "hash": "249ce501",
+    "highlights": {
+      "1": [
+        {
+          "type": "confirmed_first",
+          "player": "Raul",
+          "text": "Raul está matemáticamente clasificado como primero de grupo."
+        },
+        {
+          "type": "confirmed_last",
+          "player": "Pepe",
+          "text": "Pepe no puede evitar terminar último de grupo."
+        },
+        {
+          "type": "safe",
+          "player": "Pablo",
+          "text": "Pablo ya no puede terminar último de grupo."
+        }
+      ],
+      "2": [],
+      "3": [],
+      "4": []
+    }
+  },
+  "updatedAt": "2026-07-30T11:47:35.222Z"
 }
