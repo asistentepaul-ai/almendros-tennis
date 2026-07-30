@@ -670,7 +670,13 @@
           "text": "Carlos DM ya no puede terminar último de grupo."
         }
       ],
-      "predictions": []
+      "predictions": [
+        {
+          "type": "conditional_first",
+          "player": "Chus",
+          "text": "Chus pierde el primer puesto si Carlos DM gana a Chus por 6-2 o más y gana a Jacobo."
+        }
+      ]
     },
     "4": {
       "confirmed": [],
@@ -679,7 +685,7 @@
   },
   "highlightsCache": {
     "hash": "51b5c9e0",
-    "version": 3,
+    "version": 4,
     "highlights": {
       "1": {
         "confirmed": [
@@ -725,7 +731,13 @@
             "text": "Carlos DM ya no puede terminar último de grupo."
           }
         ],
-        "predictions": []
+        "predictions": [
+          {
+            "type": "conditional_first",
+            "player": "Chus",
+            "text": "Chus pierde el primer puesto si Carlos DM gana a Chus por 6-2 o más y gana a Jacobo."
+          }
+        ]
       },
       "4": {
         "confirmed": [],
@@ -733,5 +745,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:39:59.974Z"
+  "updatedAt": "2026-07-30T12:55:42.847Z"
 }
