@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 20,
+      "player1_id": 9,
+      "player2_id": 12,
+      "player1_games": 7,
+      "player2_games": 5,
+      "winner_id": 9,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T12:39:58.171Z",
+      "raw_input": "Chus ganó a Dani 7 5",
+      "added_by": "Pablo",
+      "player1_name": "Chus",
+      "player2_name": "Dani",
+      "winner_name": "Chus",
+      "group_number": 3
+    },
+    {
       "id": 19,
       "player1_id": 12,
       "player2_id": 11,
@@ -500,25 +517,25 @@
         "id": 9,
         "name": "Chus",
         "group_number": 3,
-        "matchesPlayed": 2,
-        "wins": 2,
+        "matchesPlayed": 3,
+        "wins": 3,
         "losses": 0,
-        "gamesWon": 12,
-        "gamesLost": 3,
-        "gamesDiff": 9,
-        "points": 16
+        "gamesWon": 19,
+        "gamesLost": 8,
+        "gamesDiff": 11,
+        "points": 25
       },
       {
         "id": 12,
         "name": "Dani",
         "group_number": 3,
-        "matchesPlayed": 3,
+        "matchesPlayed": 4,
         "wins": 2,
-        "losses": 1,
-        "gamesWon": 12,
-        "gamesLost": 9,
-        "gamesDiff": 3,
-        "points": 16
+        "losses": 2,
+        "gamesWon": 17,
+        "gamesLost": 16,
+        "gamesDiff": 1,
+        "points": 21
       },
       {
         "id": 13,
@@ -661,7 +678,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "4d560724",
+    "hash": "51b5c9e0",
     "version": 3,
     "highlights": {
       "1": {
@@ -716,5 +733,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:38:25.996Z"
+  "updatedAt": "2026-07-30T12:39:59.974Z"
 }
