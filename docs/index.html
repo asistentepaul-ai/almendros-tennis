@@ -512,6 +512,18 @@
     .tablon-dot.t-safe            { background: var(--muted); }
     .tablon-dot.t-conditional     { background: var(--clay); }
 
+    .tablon-divider {
+      border: none; border-top: 1px dashed var(--border);
+      margin: 0.35rem 0 0.15rem;
+    }
+
+    .tablon-section-label {
+      font-size: 0.62rem; color: var(--muted); font-style: italic;
+      margin-bottom: 0.2rem; display: block;
+    }
+
+    .tablon-item.prediction { opacity: 0.8; }
+
     footer {
       text-align: center; padding: 2rem;
       color: var(--muted); font-size: 0.75rem;
@@ -764,19 +776,37 @@
   };
 
   function renderTablon(groupNum) {
-    const items = allHighlights[groupNum] || [];
+    const data = allHighlights[groupNum] || {};
+    // support both new {confirmed, predictions} and legacy flat array
+    const confirmed   = Array.isArray(data) ? data : (data.confirmed   || []);
+    const predictions = Array.isArray(data) ? []   : (data.predictions || []);
+    const allItems = [...confirmed, ...predictions];
+
     const div = document.createElement('div');
     div.className = 'tablon';
-    if (items.length === 0) {
+
+    if (allItems.length === 0) {
       div.innerHTML = `<div class="tablon-header">Tablón</div><div class="tablon-item" style="color:var(--muted);font-style:italic"><div class="tablon-dot t-safe"></div><span>Sin datos suficientes para hacer predicciones.</span></div>`;
-    } else {
-      const rows = items.map(item => `
-        <div class="tablon-item">
-          <div class="tablon-dot ${TABLON_DOT[item.type] || 't-conditional'}"></div>
-          <span>${item.text}</span>
-        </div>`).join('');
-      div.innerHTML = `<div class="tablon-header">Tablón</div>${rows}`;
+      return div;
     }
+
+    const confirmedRows = confirmed.map(item => `
+      <div class="tablon-item">
+        <div class="tablon-dot ${TABLON_DOT[item.type] || 't-conditional'}"></div>
+        <span>${item.text}</span>
+      </div>`).join('');
+
+    const predRows = predictions.map(item => `
+      <div class="tablon-item prediction">
+        <div class="tablon-dot ${TABLON_DOT[item.type] || 't-conditional'}"></div>
+        <span>${item.text}</span>
+      </div>`).join('');
+
+    const divider = confirmed.length > 0 && predictions.length > 0
+      ? `<hr class="tablon-divider"><span class="tablon-section-label">Escenarios posibles</span>`
+      : '';
+
+    div.innerHTML = `<div class="tablon-header">Tablón</div>${confirmedRows}${divider}${predRows}`;
     return div;
   }
 

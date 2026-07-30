@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 
-const MAX_WIN_PTS = 9; // ganar 7-5 = 7 juegos + 2 bonus
+const MAX_WIN_PTS = 9;
+const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
+const MAX_REMAINING_TO_ENUMERATE = 4;
 
 function standingsHash(standings) {
   const str = Object.values(standings)
@@ -36,51 +38,159 @@ function getRemainingPairs(players, groupMatches) {
   return pairs;
 }
 
-async function getAIConditionals(groupNum, standings, remaining, remainingPairs, apiKey) {
-  const standingsText = standings.map((p, i) =>
-    `${i + 1}. ${p.name}: ${p.points} pts (${p.wins}V ${p.losses}D, dif. juegos: ${p.gamesDiff >= 0 ? '+' : ''}${p.gamesDiff}) — pendientes: ${remaining[p.id]}`
-  ).join('\n');
+function simulateFinalStandings(currentStandings, matchOutcomes) {
+  const final = currentStandings.map(p => ({
+    id: p.id, name: p.name,
+    points: p.points, wins: p.wins, losses: p.losses,
+    gamesWon: p.gamesWon, gamesLost: p.gamesLost,
+  }));
+  const map = Object.fromEntries(final.map(p => [p.id, p]));
 
+  for (const o of matchOutcomes) {
+    const w = map[o.winnerId];
+    const l = map[o.loserId];
+    w.points += o.wGames + 2; w.gamesWon += o.wGames; w.gamesLost += o.lGames; w.wins++;
+    l.points += o.lGames;     l.gamesWon += o.lGames; l.gamesLost += o.wGames; l.losses++;
+  }
+
+  final.sort((a, b) =>
+    b.points - a.points ||
+    (b.gamesWon - b.gamesLost) - (a.gamesWon - a.gamesLost) ||
+    b.gamesWon - a.gamesWon
+  );
+  return final;
+}
+
+function enumerateAllOutcomes(remainingPairs) {
+  let outcomes = [[]];
+  for (const [p1, p2] of remainingPairs) {
+    const expanded = [];
+    for (const existing of outcomes) {
+      for (const [w, l] of TENNIS_SCORES) {
+        expanded.push([...existing, { winnerId: p1.id, loserId: p2.id, wGames: w, lGames: l }]);
+        expanded.push([...existing, { winnerId: p2.id, loserId: p1.id, wGames: w, lGames: l }]);
+      }
+    }
+    outcomes = expanded;
+  }
+  return outcomes;
+}
+
+function analyze1MatchPredictions(standings, pair, finals, outcomes) {
+  const n = standings.length;
+  const [pA, pB] = pair;
+  const insights = [];
+
+  const currentFirst = standings[0];
+  const currentSecond = standings[1];
+  const currentLast = standings[n - 1];
+
+  // --- ÚLTIMO: ¿puede escapar el actual último? ---
+  const lastInMatch = pA.id === currentLast.id || pB.id === currentLast.id;
+
+  if (lastInMatch) {
+    const opponent = pA.id === currentLast.id ? pB : pA;
+    const escapesWhenWins = [];
+
+    for (let i = 0; i < outcomes.length; i++) {
+      const o = outcomes[i][0];
+      if (o.winnerId === currentLast.id && finals[i][n - 1].id !== currentLast.id) {
+        escapesWhenWins.push(o);
+      }
+    }
+
+    if (escapesWhenWins.length > 0 && escapesWhenWins.length < TENNIS_SCORES.length) {
+      const minDiff = Math.min(...escapesWhenWins.map(o => o.wGames - o.lGames));
+      const threshold = escapesWhenWins.find(o => o.wGames - o.lGames === minDiff);
+      insights.push({
+        type: 'conditional_safe', player: currentLast.name,
+        text: `${currentLast.name} termina último salvo que gane a ${opponent.name} por ${threshold.wGames}-${threshold.lGames} o más.`,
+      });
+    } else if (escapesWhenWins.length === TENNIS_SCORES.length) {
+      insights.push({
+        type: 'conditional_safe', player: currentLast.name,
+        text: `${currentLast.name} se salva si gana a ${opponent.name}, con cualquier marcador.`,
+      });
+    }
+  }
+
+  // --- PRIMERO: ¿puede el segundo alcanzar al primero? ---
+  const secondInMatch = pA.id === currentSecond.id || pB.id === currentSecond.id;
+  if (!secondInMatch) return insights;
+
+  const opponent2 = pA.id === currentSecond.id ? pB : pA;
+  const secondTakesFirst = [];
+
+  for (let i = 0; i < outcomes.length; i++) {
+    const o = outcomes[i][0];
+    if (o.winnerId === currentSecond.id && finals[i][0].id === currentSecond.id) {
+      secondTakesFirst.push(o);
+    }
+  }
+
+  if (secondTakesFirst.length > 0 && secondTakesFirst.length < TENNIS_SCORES.length) {
+    const minDiff = Math.min(...secondTakesFirst.map(o => o.wGames - o.lGames));
+    const threshold = secondTakesFirst.find(o => o.wGames - o.lGames === minDiff);
+    insights.push({
+      type: 'conditional_first', player: currentFirst.name,
+      text: `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name} por ${threshold.wGames}-${threshold.lGames} o más.`,
+    });
+  } else if (secondTakesFirst.length === TENNIS_SCORES.length) {
+    insights.push({
+      type: 'conditional_first', player: currentFirst.name,
+      text: `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name}.`,
+    });
+  }
+
+  return insights;
+}
+
+async function getAIMultiMatchPredictions(groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey) {
+  const n = standings.length;
+
+  const firstPct = standings
+    .map(p => ({ name: p.name, pct: Math.round(firstCount[p.id] / total * 100) }))
+    .filter(p => p.pct > 5).sort((a, b) => b.pct - a.pct);
+
+  const lastPct = standings
+    .map(p => ({ name: p.name, pct: Math.round(lastCount[p.id] / total * 100) }))
+    .filter(p => p.pct > 5).sort((a, b) => b.pct - a.pct);
+
+  if (firstPct.length === 0 && lastPct.length === 0) return [];
+
+  const standingsText = standings.map((p, i) => `${i+1}. ${p.name}: ${p.points} pts`).join('\n');
   const matchesText = remainingPairs.map(([p1, p2]) => `${p1.name} vs ${p2.name}`).join(', ');
+  const firstText = firstPct.map(p => `${p.name} ${p.pct}%`).join(', ');
+  const lastText = lastPct.map(p => `${p.name} ${p.pct}%`).join(', ');
 
-  const prompt = `Analiza la situación del Grupo ${groupNum} de este torneo de tenis y genera frases cortas y asépticas en español.
+  const prompt = `Genera máximo 2 frases cortas y asépticas en español para un tablón de torneo de tenis.
 
-Sistema de puntos: juegos ganados + 2 bonus por victoria. Desempate: diferencia de juegos, luego juegos ganados. Máximo por partido ganado ≈ 9 pts (ej. 7-5 = 9pts), mínimo 0 (perder 0-6).
-
-Clasificación:
-${standingsText}
-
+Grupo ${groupNum}. Clasificación: ${standingsText}
 Partidos pendientes: ${matchesText}
+Probabilidad de terminar primero: ${firstText}
+Probabilidad de terminar último: ${lastText}
 
-Genera solo los mensajes realmente relevantes (máximo 2 en total), en formato {"highlights": [...]}.
-Cada elemento: {"type": "conditional_first"|"conditional_safe", "player": "nombre", "text": "frase"}
-- conditional_first: si el líder puede ser alcanzado, di exactamente qué resultado necesitaría el perseguidor (qué partido, qué margen aproximado)
-- conditional_safe: si el último puede evitar serlo, di qué necesita
-
-Tono neutro y factual. Sé específico sobre resultados concretos. Si hay demasiados partidos por jugar o el gap es grande, devuelve {"highlights": []}.`;
+Una frase sobre el primero (si aplica), una sobre el último (si aplica). Tono neutro. Sin dramatismo.
+Formato: {"highlights": [{"type": "conditional_first"|"conditional_safe", "player": "nombre", "text": "frase"}]}`;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4-5-20251001',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' },
-        max_tokens: 400,
+        max_tokens: 200,
       }),
     });
-
-    const data = await response.json();
+    const data = await res.json();
     const content = data.choices?.[0]?.message?.content;
     if (!content) return [];
     const parsed = JSON.parse(content);
     return Array.isArray(parsed) ? parsed : (parsed.highlights || []);
   } catch (e) {
-    console.error(`AI highlights error (group ${groupNum}):`, e.message);
+    console.error(`AI predictions error (group ${groupNum}):`, e.message);
     return [];
   }
 }
@@ -94,7 +204,7 @@ async function computeHighlights(allStandings, allMatches, cached) {
 
   for (const [groupNum, standings] of Object.entries(allStandings)) {
     const n = standings.length;
-    if (n < 2) { highlights[groupNum] = []; continue; }
+    if (n < 2) { highlights[groupNum] = { confirmed: [], predictions: [] }; continue; }
 
     const groupIds = new Set(standings.map(p => p.id));
     const groupMatches = allMatches.filter(m => groupIds.has(m.player1_id));
@@ -106,54 +216,70 @@ async function computeHighlights(allStandings, allMatches, cached) {
     const last = standings[n - 1];
     const secondToLast = standings[n - 2];
 
-    const groupHighlights = [];
+    const confirmed = [];
 
-    // Primero matemático: líder.puntos actuales > máximo posible de cualquier perseguidor
+    // Primero matemático
     const maxChallenger = Math.max(...standings.slice(1).map(p =>
       p.points + remaining[p.id] * MAX_WIN_PTS
     ));
     const confirmedFirst = leader.points > maxChallenger;
-
     if (confirmedFirst) {
-      groupHighlights.push({
-        type: 'confirmed_first',
-        player: leader.name,
+      confirmed.push({
+        type: 'confirmed_first', player: leader.name,
         text: `${leader.name} está matemáticamente clasificado como primero de grupo.`,
       });
     }
 
-    // Último matemático: el penúltimo no puede ser alcanzado por el último
+    // Último matemático
     const lastMax = last.points + remaining[last.id] * MAX_WIN_PTS;
     const confirmedLast = secondToLast.points > lastMax;
-
     if (confirmedLast) {
-      groupHighlights.push({
-        type: 'confirmed_last',
-        player: last.name,
+      confirmed.push({
+        type: 'confirmed_last', player: last.name,
         text: `${last.name} no puede evitar terminar último de grupo.`,
       });
     }
 
-    // Salvado matemático: el antepenúltimo (si existe) no puede ser alcanzado por el último
+    // Salvado matemático
     if (n >= 3) {
       const thirdToLast = standings[n - 3];
       if (thirdToLast && thirdToLast.points > lastMax) {
-        groupHighlights.push({
-          type: 'safe',
-          player: thirdToLast.name,
+        confirmed.push({
+          type: 'safe', player: thirdToLast.name,
           text: `${thirdToLast.name} ya no puede terminar último de grupo.`,
         });
       }
     }
 
-    // Condicionales vía IA (solo si hay partidos pendientes y situación sin confirmar)
-    const needsAI = (!confirmedFirst || !confirmedLast) && remainingPairs.length > 0 && apiKey;
-    if (needsAI) {
-      const aiItems = await getAIConditionals(groupNum, standings, remaining, remainingPairs, apiKey);
-      groupHighlights.push(...aiItems);
+    // Predicciones por enumeración de escenarios
+    const predictions = [];
+    const canEnumerate = remainingPairs.length > 0 && remainingPairs.length <= MAX_REMAINING_TO_ENUMERATE;
+    const hasOpenQuestions = !confirmedFirst || !confirmedLast;
+
+    if (canEnumerate && hasOpenQuestions) {
+      const allOutcomes = enumerateAllOutcomes(remainingPairs);
+      const finals = allOutcomes.map(o => simulateFinalStandings(standings, o));
+      const total = allOutcomes.length;
+
+      if (remainingPairs.length === 1) {
+        // Umbral exacto, sin IA
+        predictions.push(...analyze1MatchPredictions(standings, remainingPairs[0], finals, allOutcomes));
+      } else if (apiKey) {
+        // 2-4 partidos: probabilidades + IA para la frase
+        const firstCount = {}, lastCount = {};
+        for (const p of standings) { firstCount[p.id] = 0; lastCount[p.id] = 0; }
+        for (const f of finals) {
+          firstCount[f[0].id]++;
+          lastCount[f[n - 1].id]++;
+        }
+        const aiItems = await getAIMultiMatchPredictions(
+          groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey
+        );
+        predictions.push(...aiItems);
+      }
     }
 
-    highlights[groupNum] = groupHighlights;
+    highlights[groupNum] = { confirmed, predictions };
   }
 
   return { highlights, hash: currentHash };
