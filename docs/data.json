@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 15,
+      "player1_id": 12,
+      "player2_id": 10,
+      "player1_games": 6,
+      "player2_games": 0,
+      "winner_id": 12,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T12:33:20.309Z",
+      "raw_input": "Dani 6 Jacobo 0",
+      "added_by": "Pablo",
+      "player1_name": "Dani",
+      "player2_name": "Jacobo",
+      "winner_name": "Dani",
+      "group_number": 3
+    },
+    {
       "id": 14,
       "player1_id": 9,
       "player2_id": 11,
@@ -424,28 +441,28 @@
         "points": 16
       },
       {
-        "id": 10,
-        "name": "Jacobo",
-        "group_number": 3,
-        "matchesPlayed": 1,
-        "wins": 0,
-        "losses": 1,
-        "gamesWon": 3,
-        "gamesLost": 6,
-        "gamesDiff": -3,
-        "points": 3
-      },
-      {
         "id": 12,
         "name": "Dani",
         "group_number": 3,
-        "matchesPlayed": 0,
-        "wins": 0,
+        "matchesPlayed": 1,
+        "wins": 1,
         "losses": 0,
-        "gamesWon": 0,
+        "gamesWon": 6,
         "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "gamesDiff": 6,
+        "points": 8
+      },
+      {
+        "id": 10,
+        "name": "Jacobo",
+        "group_number": 3,
+        "matchesPlayed": 2,
+        "wins": 0,
+        "losses": 2,
+        "gamesWon": 3,
+        "gamesLost": 12,
+        "gamesDiff": -9,
+        "points": 3
       },
       {
         "id": 13,
@@ -565,7 +582,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "0a08be6d",
+    "hash": "18cfd1b0",
     "version": 3,
     "highlights": {
       "1": {
@@ -609,5 +626,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:32:58.473Z"
+  "updatedAt": "2026-07-30T12:33:20.404Z"
 }
