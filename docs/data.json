@@ -360,23 +360,6 @@
       "group_number": 1
     },
     {
-      "id": 3,
-      "player1_id": 3,
-      "player2_id": 4,
-      "player1_games": 7,
-      "player2_games": 6,
-      "winner_id": 3,
-      "is_tiebreak": 1,
-      "tiebreak_score": null,
-      "played_at": "2026-07-29T19:23:37.155Z",
-      "raw_input": "Raúl Pablo 7-6",
-      "added_by": "Pablo",
-      "player1_name": "Raul",
-      "player2_name": "Pablo",
-      "winner_name": "Raul",
-      "group_number": 1
-    },
-    {
       "id": 2,
       "player1_id": 1,
       "player2_id": 2,
@@ -417,25 +400,13 @@
         "id": 3,
         "name": "Raul",
         "group_number": 1,
-        "matchesPlayed": 3,
-        "wins": 3,
+        "matchesPlayed": 2,
+        "wins": 2,
         "losses": 0,
-        "gamesWon": 19,
-        "gamesLost": 15,
-        "gamesDiff": 4,
-        "points": 25
-      },
-      {
-        "id": 4,
-        "name": "Pablo",
-        "group_number": 1,
-        "matchesPlayed": 3,
-        "wins": 1,
-        "losses": 2,
-        "gamesWon": 16,
-        "gamesLost": 14,
-        "gamesDiff": 2,
-        "points": 18
+        "gamesWon": 12,
+        "gamesLost": 9,
+        "gamesDiff": 3,
+        "points": 16
       },
       {
         "id": 2,
@@ -460,6 +431,18 @@
         "gamesLost": 13,
         "gamesDiff": -2,
         "points": 13
+      },
+      {
+        "id": 4,
+        "name": "Pablo",
+        "group_number": 1,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 10,
+        "gamesLost": 7,
+        "gamesDiff": 3,
+        "points": 12
       }
     ],
     "2": [
@@ -627,19 +610,14 @@
   },
   "highlights": {
     "1": {
-      "confirmed": [
+      "confirmed": [],
+      "predictions": [
         {
-          "type": "confirmed_first",
-          "player": "Raul",
-          "text": "Raul está matemáticamente clasificado como primero de grupo."
-        },
-        {
-          "type": "confirmed_last",
-          "player": "Pepe",
-          "text": "Pepe no puede evitar terminar último de grupo."
+          "type": "conditional_safe",
+          "player": "Pablo",
+          "text": "Pablo se salva del último puesto si gana a Raul, con cualquier marcador."
         }
-      ],
-      "predictions": []
+      ]
     },
     "2": {
       "confirmed": [
@@ -684,23 +662,18 @@
     }
   },
   "highlightsCache": {
-    "hash": "9e628566",
+    "hash": "bbdae394",
     "version": 5,
     "highlights": {
       "1": {
-        "confirmed": [
+        "confirmed": [],
+        "predictions": [
           {
-            "type": "confirmed_first",
-            "player": "Raul",
-            "text": "Raul está matemáticamente clasificado como primero de grupo."
-          },
-          {
-            "type": "confirmed_last",
-            "player": "Pepe",
-            "text": "Pepe no puede evitar terminar último de grupo."
+            "type": "conditional_safe",
+            "player": "Pablo",
+            "text": "Pablo se salva del último puesto si gana a Raul, con cualquier marcador."
           }
-        ],
-        "predictions": []
+        ]
       },
       "2": {
         "confirmed": [
@@ -745,5 +718,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T13:19:33.478Z"
+  "updatedAt": "2026-07-30T13:31:01.385Z"
 }
