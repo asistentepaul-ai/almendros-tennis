@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 13,
+      "player1_id": 8,
+      "player2_id": 6,
+      "player1_games": 1,
+      "player2_games": 6,
+      "winner_id": 6,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T12:00:34.431Z",
+      "raw_input": "Alex 1 Mario 6",
+      "added_by": "Pablo",
+      "player1_name": "Alex",
+      "player2_name": "Mario",
+      "winner_name": "Mario",
+      "group_number": 2
+    },
+    {
       "id": 12,
       "player1_id": 5,
       "player2_id": 8,
@@ -331,25 +348,25 @@
         "id": 6,
         "name": "Mario",
         "group_number": 2,
-        "matchesPlayed": 2,
-        "wins": 2,
+        "matchesPlayed": 3,
+        "wins": 3,
         "losses": 0,
-        "gamesWon": 12,
-        "gamesLost": 6,
-        "gamesDiff": 6,
-        "points": 16
+        "gamesWon": 18,
+        "gamesLost": 7,
+        "gamesDiff": 11,
+        "points": 24
       },
       {
         "id": 8,
         "name": "Alex",
         "group_number": 2,
-        "matchesPlayed": 2,
+        "matchesPlayed": 3,
         "wins": 1,
-        "losses": 1,
-        "gamesWon": 9,
-        "gamesLost": 6,
-        "gamesDiff": 3,
-        "points": 11
+        "losses": 2,
+        "gamesWon": 10,
+        "gamesLost": 12,
+        "gamesDiff": -2,
+        "points": 12
       },
       {
         "id": 7,
@@ -507,12 +524,18 @@
         "text": "Pablo ya no puede terminar último de grupo."
       }
     ],
-    "2": [],
+    "2": [
+      {
+        "type": "confirmed_first",
+        "player": "Mario",
+        "text": "Mario está matemáticamente clasificado como primero de grupo."
+      }
+    ],
     "3": [],
     "4": []
   },
   "highlightsCache": {
-    "hash": "24825251",
+    "hash": "9446946e",
     "highlights": {
       "1": [
         {
@@ -531,10 +554,16 @@
           "text": "Pablo ya no puede terminar último de grupo."
         }
       ],
-      "2": [],
+      "2": [
+        {
+          "type": "confirmed_first",
+          "player": "Mario",
+          "text": "Mario está matemáticamente clasificado como primero de grupo."
+        }
+      ],
       "3": [],
       "4": []
     }
   },
-  "updatedAt": "2026-07-30T11:58:18.655Z"
+  "updatedAt": "2026-07-30T12:00:42.959Z"
 }
