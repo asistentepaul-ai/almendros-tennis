@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 12,
+      "player1_id": 5,
+      "player2_id": 8,
+      "player1_games": 0,
+      "player2_games": 6,
+      "winner_id": 8,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T11:58:10.633Z",
+      "raw_input": "Sergio 0 Alex 6",
+      "added_by": "Pablo",
+      "player1_name": "Sergio",
+      "player2_name": "Alex",
+      "winner_name": "Alex",
+      "group_number": 2
+    },
+    {
       "id": 11,
       "player1_id": 8,
       "player2_id": 7,
@@ -323,6 +340,18 @@
         "points": 16
       },
       {
+        "id": 8,
+        "name": "Alex",
+        "group_number": 2,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 9,
+        "gamesLost": 6,
+        "gamesDiff": 3,
+        "points": 11
+      },
+      {
         "id": 7,
         "name": "Jorge",
         "group_number": 2,
@@ -338,24 +367,12 @@
         "id": 5,
         "name": "Sergio",
         "group_number": 2,
-        "matchesPlayed": 1,
+        "matchesPlayed": 2,
         "wins": 0,
-        "losses": 1,
+        "losses": 2,
         "gamesWon": 3,
-        "gamesLost": 6,
-        "gamesDiff": -3,
-        "points": 3
-      },
-      {
-        "id": 8,
-        "name": "Alex",
-        "group_number": 2,
-        "matchesPlayed": 1,
-        "wins": 0,
-        "losses": 1,
-        "gamesWon": 3,
-        "gamesLost": 6,
-        "gamesDiff": -3,
+        "gamesLost": 12,
+        "gamesDiff": -9,
         "points": 3
       }
     ],
@@ -495,7 +512,7 @@
     "4": []
   },
   "highlightsCache": {
-    "hash": "24697505",
+    "hash": "24825251",
     "highlights": {
       "1": [
         {
@@ -519,5 +536,5 @@
       "4": []
     }
   },
-  "updatedAt": "2026-07-30T11:56:01.304Z"
+  "updatedAt": "2026-07-30T11:58:18.655Z"
 }
