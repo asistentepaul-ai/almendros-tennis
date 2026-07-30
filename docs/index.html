@@ -768,7 +768,7 @@
     const div = document.createElement('div');
     div.className = 'tablon';
     if (items.length === 0) {
-      div.innerHTML = `<div class="tablon-header">Tablón</div><div class="tablon-item" style="color:var(--muted);font-style:italic"><div class="tablon-dot t-safe"></div><span>La pista espera.</span></div>`;
+      div.innerHTML = `<div class="tablon-header">Tablón</div><div class="tablon-item" style="color:var(--muted);font-style:italic"><div class="tablon-dot t-safe"></div><span>Sin datos suficientes para hacer predicciones.</span></div>`;
     } else {
       const rows = items.map(item => `
         <div class="tablon-item">
