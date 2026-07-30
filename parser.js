@@ -93,7 +93,7 @@ async function aiParse(text) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
 
-  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4-5-20251001';
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -121,8 +121,16 @@ Si no puedes interpretar, responde: null`,
       }),
     });
 
+    if (!response.ok) {
+      console.error(`aiParse: OpenRouter HTTP ${response.status} (modelo: ${model})`);
+      return null;
+    }
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
+    let content = data.choices?.[0]?.message?.content?.trim();
+    if (!content || content === 'null') return null;
+
+    // Strip markdown code fences if present
+    content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
     if (!content || content === 'null') return null;
 
     const parsed = JSON.parse(content);

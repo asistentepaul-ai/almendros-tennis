@@ -1,9 +1,9 @@
 const crypto = require('crypto');
 
-const HIGHLIGHTS_VERSION = 4; // bump: deterministic multi-match predictions
+const HIGHLIGHTS_VERSION = 5; // bump: frases exactas por enumeración, sin IA en el tablón
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
-const MAX_REMAINING_TO_ENUMERATE = 4;
+const MAX_REMAINING_TO_ENUMERATE = 5; // 14^5 ≈ 540k escenarios, <2s
 
 function standingsHash(standings) {
   const str = Object.values(standings)
@@ -77,133 +77,84 @@ function enumerateAllOutcomes(remainingPairs) {
   return outcomes;
 }
 
+
+function scoreLabel(s) { return `${s[0]}-${s[1]}`; }
+
+function listToText(arr) {
+  return arr.length === 1 ? arr[0] : arr.slice(0, -1).join(', ') + ' o ' + arr[arr.length - 1];
+}
+
+// Convierte un conjunto de marcadores ganadores en una frase exacta.
+// Solo usa "por X-Y o más" cuando el conjunto coincide EXACTAMENTE con
+// {marcadores con margen >= m}; si no, enumera los marcadores válidos.
+function phraseWinningScores(qualifying) {
+  if (qualifying.length === 0) return null;
+  if (qualifying.length === TENNIS_SCORES.length) return { any: true };
+  const minMargin = Math.min(...qualifying.map(s => s[0] - s[1]));
+  const marginSet = TENNIS_SCORES.filter(s => s[0] - s[1] >= minMargin);
+  const sameSet = marginSet.length === qualifying.length &&
+    marginSet.every(s => qualifying.some(q => q[0] === s[0] && q[1] === s[1]));
+  if (sameSet) {
+    const rep = qualifying.filter(s => s[0] - s[1] === minMargin).sort((a, b) => a[0] - b[0])[0];
+    return { any: false, marginRule: true, rep };
+  }
+  return { any: false, marginRule: false, list: qualifying.map(scoreLabel) };
+}
+
+function winCondText(qual, oppName) {
+  const ph = phraseWinningScores(qual);
+  if (!ph) return null;
+  if (ph.any) return `gana a ${oppName}, con cualquier marcador`;
+  if (qual.length === 1) return `gana a ${oppName} exactamente ${scoreLabel(qual[0])}`;
+  if (qual.length === TENNIS_SCORES.length - 1) {
+    const falta = TENNIS_SCORES.find(s => !qual.some(q => q[0] === s[0] && q[1] === s[1]));
+    return `gana a ${oppName} con cualquier marcador salvo ${scoreLabel(falta)}`;
+  }
+  if (ph.marginRule) return `gana a ${oppName} por ${scoreLabel(ph.rep)} o más`;
+  return `gana a ${oppName} ${ph.list.length === 1 ? 'exactamente ' : ''}${listToText(ph.list)}`;
+}
+
 function analyze1MatchPredictions(standings, pair, finals, outcomes) {
   const n = standings.length;
   const [pA, pB] = pair;
   const insights = [];
+  const first = standings[0], second = standings[1], last = standings[n - 1];
 
-  const currentFirst = standings[0];
-  const currentSecond = standings[1];
-  const currentLast = standings[n - 1];
-
-  // --- ÚLTIMO: ¿puede escapar el actual último? ---
-  const lastInMatch = pA.id === currentLast.id || pB.id === currentLast.id;
-
-  if (lastInMatch) {
-    const opponent = pA.id === currentLast.id ? pB : pA;
-    const escapesWhenWins = [];
-
+  // Marcadores con los que `playerId` gana y se cumple `pred` sobre la clasificación final
+  const qualScores = (playerId, pred) => {
+    const qual = [];
     for (let i = 0; i < outcomes.length; i++) {
       const o = outcomes[i][0];
-      if (o.winnerId === currentLast.id && finals[i][n - 1].id !== currentLast.id) {
-        escapesWhenWins.push(o);
-      }
+      if (o.winnerId === playerId && pred(finals[i])) qual.push([o.wGames, o.lGames]);
     }
+    return qual;
+  };
 
-    if (escapesWhenWins.length > 0 && escapesWhenWins.length < TENNIS_SCORES.length) {
-      const minDiff = Math.min(...escapesWhenWins.map(o => o.wGames - o.lGames));
-      const threshold = escapesWhenWins.find(o => o.wGames - o.lGames === minDiff);
-      const maxPossibleDiff = 6; // 6-0 es el máximo en un set
-      const isMaxScore = threshold.wGames - threshold.lGames === maxPossibleDiff;
-      const saveText = isMaxScore
-        ? `${currentLast.name} solo se salva ganando 6-0 a ${opponent.name}.`
-        : `${currentLast.name} termina último salvo que gane a ${opponent.name} por ${threshold.wGames}-${threshold.lGames} o más.`;
+  // --- ÚLTIMO: ¿puede escapar el actual último? ---
+  if (pA.id === last.id || pB.id === last.id) {
+    const opp = pA.id === last.id ? pB : pA;
+    const qual = qualScores(last.id, f => f[n - 1].id !== last.id);
+    if (qual.length > 0) {
       insights.push({
-        type: 'conditional_safe', player: currentLast.name,
-        text: saveText,
-      });
-    } else if (escapesWhenWins.length === TENNIS_SCORES.length) {
-      insights.push({
-        type: 'conditional_safe', player: currentLast.name,
-        text: `${currentLast.name} se salva si gana a ${opponent.name}, con cualquier marcador.`,
+        type: 'conditional_safe', player: last.name,
+        text: `${last.name} se salva del último puesto si ${winCondText(qual, opp.name)}.`,
       });
     }
   }
 
-  // --- PRIMERO: ¿puede el segundo alcanzar al primero? ---
-  const secondInMatch = pA.id === currentSecond.id || pB.id === currentSecond.id;
-  if (!secondInMatch) return insights;
-
-  const opponent2 = pA.id === currentSecond.id ? pB : pA;
-  const secondTakesFirst = [];
-
-  for (let i = 0; i < outcomes.length; i++) {
-    const o = outcomes[i][0];
-    if (o.winnerId === currentSecond.id && finals[i][0].id === currentSecond.id) {
-      secondTakesFirst.push(o);
+  // --- PRIMERO: ¿puede el segundo arrebatar el primer puesto? ---
+  if (pA.id === second.id || pB.id === second.id) {
+    const opp = pA.id === second.id ? pB : pA;
+    const qual = qualScores(second.id, f => f[0].id === second.id);
+    if (qual.length > 0) {
+      insights.push({
+        type: 'conditional_first', player: first.name,
+        text: `${first.name} pierde el primer puesto si ${second.name} ${winCondText(qual, opp.name)}.`,
+      });
     }
-  }
-
-  if (secondTakesFirst.length > 0 && secondTakesFirst.length < TENNIS_SCORES.length) {
-    const minDiff = Math.min(...secondTakesFirst.map(o => o.wGames - o.lGames));
-    const threshold = secondTakesFirst.find(o => o.wGames - o.lGames === minDiff);
-    const maxPossibleDiff = 6;
-    const isMaxScore = threshold.wGames - threshold.lGames === maxPossibleDiff;
-    const firstText = isMaxScore
-      ? `${currentFirst.name} pierde el primer puesto solo si ${currentSecond.name} gana 6-0 a ${opponent2.name}.`
-      : `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name} por ${threshold.wGames}-${threshold.lGames} o más.`;
-    insights.push({
-      type: 'conditional_first', player: currentFirst.name,
-      text: firstText,
-    });
-  } else if (secondTakesFirst.length === TENNIS_SCORES.length) {
-    insights.push({
-      type: 'conditional_first', player: currentFirst.name,
-      text: `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name}.`,
-    });
   }
 
   return insights;
-}
-
-async function getAIMultiMatchPredictions(groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey) {
-  const n = standings.length;
-
-  // Only call AI if the situation is genuinely competitive (leader/last could change)
-  const leader = standings[0];
-  const last = standings[n - 1];
-  const leaderDominates = firstCount[leader.id] / total > 0.95;
-  const lastDominates = lastCount[last.id] / total > 0.95;
-  if (leaderDominates && lastDominates) return [];
-
-  const standingsText = standings.map((p, i) =>
-    `${i+1}. ${p.name}: ${p.points} pts (${p.wins}V ${p.losses}D, dif. juegos: ${p.gamesDiff >= 0 ? '+' : ''}${p.gamesDiff})`
-  ).join('\n');
-  const matchesText = remainingPairs.map(([p1, p2]) => `${p1.name} vs ${p2.name}`).join(', ');
-
-  const prompt = `Genera máximo 2 frases cortas y asépticas en español para un tablón de torneo de tenis.
-Sistema de puntos: juegos ganados + 2 bonus por victoria. Desempate: diferencia de juegos, luego juegos ganados.
-
-Grupo ${groupNum}. Clasificación actual:
-${standingsText}
-Partidos pendientes: ${matchesText}
-
-Genera frases que hagan referencia a resultados concretos de partidos, no a porcentajes ni probabilidades.
-Ejemplo válido: "X pierde el primero si Y gana a Z y además lo hace por más de 6-3."
-Ejemplo válido: "A se salva si gana a B o si C pierde su partido."
-Una frase sobre el primero (si la situación es ajustada), una sobre el último (si aplica). Tono neutro.
-Formato: {"highlights": [{"type": "conditional_first"|"conditional_safe", "player": "nombre", "text": "frase"}]}`;
-
-  try {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4-5-20251001',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-        max_tokens: 200,
-      }),
-    });
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) return [];
-    const parsed = JSON.parse(content);
-    return Array.isArray(parsed) ? parsed : (parsed.highlights || []);
-  } catch (e) {
-    console.error(`AI predictions error (group ${groupNum}):`, e.message);
-    return [];
-  }
 }
 
 function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total) {
@@ -246,11 +197,10 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
           text: `${leader.name} pierde el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos (${oppNames}).`,
         });
       } else {
-        // Ganar todos es necesario pero el margen contra el líder importa
-        // Buscar el mínimo margen de victoria contra el líder dentro de los escenarios "gana todos → 1º"
-        let minMargin = Infinity;
+        // Ganar todos no siempre basta: el marcador contra el líder decide.
+        // Para cada marcador h2h, ¿ganar todos GARANTIZA el 1º (en todos los sub-escenarios)?
+        const perScore = new Map();
         for (let i = 0; i < allOutcomes.length; i++) {
-          if (finals[i][0].id !== topChallenger.id) continue;
           const winsAll = cPairs.every(([p1, p2]) => {
             const oc = allOutcomes[i].find(x =>
               (x.winnerId === p1.id && x.loserId === p2.id) ||
@@ -259,29 +209,35 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
             return oc && oc.winnerId === topChallenger.id;
           });
           if (!winsAll) continue;
-          const oc = allOutcomes[i].find(x =>
+          const h2h = allOutcomes[i].find(x =>
             (x.winnerId === topChallenger.id && x.loserId === leader.id) ||
             (x.winnerId === leader.id && x.loserId === topChallenger.id)
           );
-          if (oc && oc.winnerId === topChallenger.id) {
-            minMargin = Math.min(minMargin, oc.wGames - oc.lGames);
-          }
+          if (!h2h) continue;
+          const key = `${h2h.wGames}-${h2h.lGames}`;
+          const e = perScore.get(key) || { tot: 0, first: 0 };
+          e.tot++;
+          if (finals[i][0].id === topChallenger.id) e.first++;
+          perScore.set(key, e);
         }
-        if (minMargin < Infinity) {
-          const threshold = TENNIS_SCORES.find(([w, l]) => w - l === minMargin);
-          if (threshold) {
-            const [tw, tl] = threshold;
-            const otherOpps = cPairs
-              .filter(([p1, p2]) => p1.id !== leader.id && p2.id !== leader.id)
-              .map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name);
-            const extra = otherOpps.length > 0 ? ` y gana a ${otherOpps.join(' y ')}` : '';
-            insights.push({
-              type: 'conditional_first', player: leader.name,
-              text: minMargin === 6
-                ? `${leader.name} pierde el primer puesto solo si ${topChallenger.name} gana a ${leader.name} 6-0${extra}.`
-                : `${leader.name} pierde el primer puesto si ${topChallenger.name} gana a ${leader.name} por ${tw}-${tl} o más${extra}.`,
-            });
-          }
+        const alwaysSet = TENNIS_SCORES.filter(s => {
+          const e = perScore.get(scoreLabel(s));
+          return e && e.first === e.tot;
+        });
+        const otherOpps = cPairs
+          .filter(([p1, p2]) => p1.id !== leader.id && p2.id !== leader.id)
+          .map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name);
+        const extra = otherOpps.length > 0 ? ` y además gana a ${otherOpps.join(' y ')}` : '';
+        if (alwaysSet.length > 0) {
+          insights.push({
+            type: 'conditional_first', player: leader.name,
+            text: `${leader.name} pierde el primer puesto si ${topChallenger.name} le ${winCondText(alwaysSet, leader.name).replace(`gana a ${leader.name}`, 'gana')}${extra}.`,
+          });
+        } else {
+          insights.push({
+            type: 'conditional_first', player: leader.name,
+            text: `${leader.name} podría perder el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos, según los demás resultados.`,
+          });
         }
       }
     } else if (topCount > 0) {
@@ -324,11 +280,10 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
   return insights;
 }
 
-async function computeHighlights(allStandings, allMatches, cached) {
+function computeHighlights(allStandings, allMatches, cached) {
   const currentHash = standingsHash(allStandings);
   if (cached?.hash === currentHash && cached?.version === HIGHLIGHTS_VERSION) return cached;
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
   const highlights = {};
 
   for (const [groupNum, standings] of Object.entries(allStandings)) {
@@ -403,12 +358,6 @@ async function computeHighlights(allStandings, allMatches, cached) {
           standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total
         ));
 
-        if (apiKey && predictions.length === 0) {
-          const aiItems = await getAIMultiMatchPredictions(
-            groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey
-          );
-          predictions.push(...aiItems);
-        }
       }
     }
 
