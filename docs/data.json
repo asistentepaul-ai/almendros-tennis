@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 18,
+      "player1_id": 13,
+      "player2_id": 11,
+      "player1_games": 6,
+      "player2_games": 1,
+      "winner_id": 13,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T12:35:38.599Z",
+      "raw_input": "Carlos 6 JJ 1",
+      "added_by": "Pablo",
+      "player1_name": "Carlos DM",
+      "player2_name": "JJ",
+      "winner_name": "Carlos DM",
+      "group_number": 3
+    },
+    {
       "id": 17,
       "player1_id": 12,
       "player2_id": 13,
@@ -487,6 +504,18 @@
         "points": 16
       },
       {
+        "id": 13,
+        "name": "Carlos DM",
+        "group_number": 3,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 9,
+        "gamesLost": 7,
+        "gamesDiff": 2,
+        "points": 11
+      },
+      {
         "id": 10,
         "name": "Jacobo",
         "group_number": 3,
@@ -499,28 +528,16 @@
         "points": 11
       },
       {
-        "id": 13,
-        "name": "Carlos DM",
-        "group_number": 3,
-        "matchesPlayed": 1,
-        "wins": 0,
-        "losses": 1,
-        "gamesWon": 3,
-        "gamesLost": 6,
-        "gamesDiff": -3,
-        "points": 3
-      },
-      {
         "id": 11,
         "name": "JJ",
         "group_number": 3,
-        "matchesPlayed": 2,
+        "matchesPlayed": 3,
         "wins": 0,
-        "losses": 2,
-        "gamesWon": 1,
-        "gamesLost": 12,
-        "gamesDiff": -11,
-        "points": 1
+        "losses": 3,
+        "gamesWon": 2,
+        "gamesLost": 18,
+        "gamesDiff": -16,
+        "points": 2
       }
     ],
     "4": [
@@ -616,7 +633,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "fe62a0af",
+    "hash": "a2210144",
     "version": 3,
     "highlights": {
       "1": {
@@ -660,5 +677,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:34:52.225Z"
+  "updatedAt": "2026-07-30T12:35:41.576Z"
 }
