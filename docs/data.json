@@ -613,9 +613,22 @@
       "confirmed": [],
       "predictions": [
         {
-          "type": "conditional_safe",
+          "type": "conditional_first",
           "player": "Pablo",
-          "text": "Pablo se salva del último puesto si gana a Raul, con cualquier marcador."
+          "text": "Pablo, actualmente último, se clasifica si vence a Raul, y gana el grupo salvo si pierde 7-6.",
+          "styled": true
+        },
+        {
+          "type": "conditional_first",
+          "player": "Raul",
+          "text": "Raul mantiene la primera posición incluso si Pablo le derrota con marcador de 7-6.",
+          "styled": true
+        },
+        {
+          "type": "conditional_last",
+          "player": "Pepe",
+          "text": "Pepe desciende al último lugar si Raul vence a Pablo 6-2, 6-3, 6-4, 7-5 o 7-6, o si Pablo gana.",
+          "styled": true
         }
       ]
     },
@@ -631,7 +644,14 @@
         {
           "type": "conditional_safe",
           "player": "Sergio",
-          "text": "Sergio se salva del último puesto si gana a Jorge por 6-1 o más."
+          "text": "Sergio evitará el último puesto si derrota a Jorge con un marcador de 6-1 o superior.",
+          "styled": true
+        },
+        {
+          "type": "conditional_last",
+          "player": "Jorge",
+          "text": "Jorge descenderá al último puesto si Sergio lo vence con un marcador de 6-1 o superior.",
+          "styled": true
         }
       ]
     },
@@ -652,7 +672,8 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Chus pierde el primer puesto si Carlos DM le gana por 6-2 o más y además gana a Jacobo."
+          "text": "Chus perderá el liderato si Carlos DM lo vence 6-2 o con mayor diferencia y además derrota a Jacobo.",
+          "styled": true
         }
       ]
     },
@@ -663,15 +684,28 @@
   },
   "highlightsCache": {
     "hash": "bbdae394",
-    "version": 5,
+    "version": 6,
     "highlights": {
       "1": {
         "confirmed": [],
         "predictions": [
           {
-            "type": "conditional_safe",
+            "type": "conditional_first",
             "player": "Pablo",
-            "text": "Pablo se salva del último puesto si gana a Raul, con cualquier marcador."
+            "text": "Pablo, actualmente último, se clasifica si vence a Raul, y gana el grupo salvo si pierde 7-6.",
+            "styled": true
+          },
+          {
+            "type": "conditional_first",
+            "player": "Raul",
+            "text": "Raul mantiene la primera posición incluso si Pablo le derrota con marcador de 7-6.",
+            "styled": true
+          },
+          {
+            "type": "conditional_last",
+            "player": "Pepe",
+            "text": "Pepe desciende al último lugar si Raul vence a Pablo 6-2, 6-3, 6-4, 7-5 o 7-6, o si Pablo gana.",
+            "styled": true
           }
         ]
       },
@@ -687,7 +721,14 @@
           {
             "type": "conditional_safe",
             "player": "Sergio",
-            "text": "Sergio se salva del último puesto si gana a Jorge por 6-1 o más."
+            "text": "Sergio evitará el último puesto si derrota a Jorge con un marcador de 6-1 o superior.",
+            "styled": true
+          },
+          {
+            "type": "conditional_last",
+            "player": "Jorge",
+            "text": "Jorge descenderá al último puesto si Sergio lo vence con un marcador de 6-1 o superior.",
+            "styled": true
           }
         ]
       },
@@ -708,7 +749,8 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Chus pierde el primer puesto si Carlos DM le gana por 6-2 o más y además gana a Jacobo."
+            "text": "Chus perderá el liderato si Carlos DM lo vence 6-2 o con mayor diferencia y además derrota a Jacobo.",
+            "styled": true
           }
         ]
       },
@@ -718,5 +760,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T13:31:01.385Z"
+  "updatedAt": "2026-07-30T13:44:15.661Z"
 }
