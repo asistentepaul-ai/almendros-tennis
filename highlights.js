@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const HIGHLIGHTS_VERSION = 3; // incrementar para invalidar caché al cambiar lógica
+const HIGHLIGHTS_VERSION = 4; // bump: deterministic multi-match predictions
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
 const MAX_REMAINING_TO_ENUMERATE = 4;
@@ -206,6 +206,124 @@ Formato: {"highlights": [{"type": "conditional_first"|"conditional_safe", "playe
   }
 }
 
+function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total) {
+  const n = standings.length;
+  const leader = standings[0];
+  const last = standings[n - 1];
+  const insights = [];
+
+  // --- AMENAZA AL PRIMER PUESTO ---
+  let topChallenger = null, topCount = 0;
+  for (const p of standings.slice(1)) {
+    if (firstCount[p.id] > topCount) { topCount = firstCount[p.id]; topChallenger = p; }
+  }
+
+  if (topChallenger && topCount > 0) {
+    const cPairs = remainingPairs.filter(([p1, p2]) => p1.id === topChallenger.id || p2.id === topChallenger.id);
+    const vsLeaderPair = cPairs.find(([p1, p2]) => p1.id === leader.id || p2.id === leader.id);
+
+    // Analizar la rama "gana todos sus partidos" — cubre el escenario dominante
+    let winsAllCount = 0, winsAllTakes1st = 0;
+    for (let i = 0; i < allOutcomes.length; i++) {
+      const winsAll = cPairs.every(([p1, p2]) => {
+        const oc = allOutcomes[i].find(x =>
+          (x.winnerId === p1.id && x.loserId === p2.id) ||
+          (x.winnerId === p2.id && x.loserId === p1.id)
+        );
+        return oc && oc.winnerId === topChallenger.id;
+      });
+      if (!winsAll) continue;
+      winsAllCount++;
+      if (finals[i][0].id === topChallenger.id) winsAllTakes1st++;
+    }
+
+    if (winsAllTakes1st > 0 && vsLeaderPair) {
+      if (winsAllTakes1st === winsAllCount) {
+        // Ganar todos SIEMPRE lleva al 1º → condición limpia sin umbral de margen
+        const oppNames = cPairs.map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name).join(' y ');
+        insights.push({
+          type: 'conditional_first', player: leader.name,
+          text: `${leader.name} pierde el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos (${oppNames}).`,
+        });
+      } else {
+        // Ganar todos es necesario pero el margen contra el líder importa
+        // Buscar el mínimo margen de victoria contra el líder dentro de los escenarios "gana todos → 1º"
+        let minMargin = Infinity;
+        for (let i = 0; i < allOutcomes.length; i++) {
+          if (finals[i][0].id !== topChallenger.id) continue;
+          const winsAll = cPairs.every(([p1, p2]) => {
+            const oc = allOutcomes[i].find(x =>
+              (x.winnerId === p1.id && x.loserId === p2.id) ||
+              (x.winnerId === p2.id && x.loserId === p1.id)
+            );
+            return oc && oc.winnerId === topChallenger.id;
+          });
+          if (!winsAll) continue;
+          const oc = allOutcomes[i].find(x =>
+            (x.winnerId === topChallenger.id && x.loserId === leader.id) ||
+            (x.winnerId === leader.id && x.loserId === topChallenger.id)
+          );
+          if (oc && oc.winnerId === topChallenger.id) {
+            minMargin = Math.min(minMargin, oc.wGames - oc.lGames);
+          }
+        }
+        if (minMargin < Infinity) {
+          const threshold = TENNIS_SCORES.find(([w, l]) => w - l === minMargin);
+          if (threshold) {
+            const [tw, tl] = threshold;
+            const otherOpps = cPairs
+              .filter(([p1, p2]) => p1.id !== leader.id && p2.id !== leader.id)
+              .map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name);
+            const extra = otherOpps.length > 0 ? ` y gana a ${otherOpps.join(' y ')}` : '';
+            insights.push({
+              type: 'conditional_first', player: leader.name,
+              text: minMargin === 6
+                ? `${leader.name} pierde el primer puesto solo si ${topChallenger.name} gana a ${leader.name} 6-0${extra}.`
+                : `${leader.name} pierde el primer puesto si ${topChallenger.name} gana a ${leader.name} por ${tw}-${tl} o más${extra}.`,
+            });
+          }
+        }
+      }
+    } else if (topCount > 0) {
+      // Sin partido directo contra el líder, o casos sin "gana todos" suficiente → mensaje genérico
+      const oppNames = cPairs.map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name).join(' y ');
+      insights.push({
+        type: 'conditional_first', player: leader.name,
+        text: `${leader.name} podría perder el primer puesto: ${topChallenger.name} tiene opciones ganando a ${oppNames}.`,
+      });
+    }
+  }
+
+  // --- ESCAPE DEL ÚLTIMO PUESTO ---
+  if (lastCount[last.id] < total) {
+    const lastPairs = remainingPairs.filter(([p1, p2]) => p1.id === last.id || p2.id === last.id);
+    if (lastPairs.length > 0) {
+      // ¿Hay algún escenario en que el último gana un partido pero sigue siendo último?
+      let winsButStillLast = false;
+      for (let i = 0; i < allOutcomes.length; i++) {
+        if (finals[i][n - 1].id !== last.id) continue;
+        const winsAny = lastPairs.some(([p1, p2]) => {
+          const oc = allOutcomes[i].find(x =>
+            (x.winnerId === p1.id && x.loserId === p2.id) ||
+            (x.winnerId === p2.id && x.loserId === p1.id)
+          );
+          return oc && oc.winnerId === last.id;
+        });
+        if (winsAny) { winsButStillLast = true; break; }
+      }
+      const oppNames = lastPairs.map(([p1, p2]) => (p1.id === last.id ? p2 : p1).name).join(' o ');
+      insights.push({
+        type: 'conditional_safe', player: last.name,
+        text: winsButStillLast
+          ? `${last.name} tiene opciones de escapar del último ganando con suficiente margen a ${oppNames}.`
+          : `${last.name} se salva del último si gana a ${oppNames}.`,
+      });
+    }
+  }
+
+  return insights;
+}
+
 async function computeHighlights(allStandings, allMatches, cached) {
   const currentHash = standingsHash(allStandings);
   if (cached?.hash === currentHash && cached?.version === HIGHLIGHTS_VERSION) return cached;
@@ -275,18 +393,22 @@ async function computeHighlights(allStandings, allMatches, cached) {
       if (remainingPairs.length === 1) {
         // Umbral exacto, sin IA
         predictions.push(...analyze1MatchPredictions(standings, remainingPairs[0], finals, allOutcomes));
-      } else if (apiKey) {
-        // 2-4 partidos: probabilidades + IA para la frase
+      } else {
+        // 2-4 partidos: análisis determinista siempre; IA solo como fallback si no hay nada
         const firstCount = {}, lastCount = {};
         for (const p of standings) { firstCount[p.id] = 0; lastCount[p.id] = 0; }
-        for (const f of finals) {
-          firstCount[f[0].id]++;
-          lastCount[f[n - 1].id]++;
+        for (const f of finals) { firstCount[f[0].id]++; lastCount[f[n - 1].id]++; }
+
+        predictions.push(...analyzeMultiMatchPredictions(
+          standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total
+        ));
+
+        if (apiKey && predictions.length === 0) {
+          const aiItems = await getAIMultiMatchPredictions(
+            groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey
+          );
+          predictions.push(...aiItems);
         }
-        const aiItems = await getAIMultiMatchPredictions(
-          groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey
-        );
-        predictions.push(...aiItems);
       }
     }
 
