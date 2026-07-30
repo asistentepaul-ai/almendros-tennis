@@ -1,6 +1,14 @@
+// Tablón: hechos ciertos + hipótesis de escenarios.
+// Arquitectura en dos capas:
+//   1. MOTOR DETERMINISTA — enumera todos los desenlaces posibles de los
+//      partidos pendientes y deriva hechos demostrables (nunca inventa).
+//   2. REDACCIÓN — plantillas deterministas; opcionalmente la IA (Haiku vía
+//      OpenRouter) re-redacta para sonar natural, con VALIDACIÓN estricta
+//      (mismos jugadores, mismos marcadores) y fallback a la plantilla.
+try { require('dotenv').config(); } catch (_) {}
 const crypto = require('crypto');
 
-const HIGHLIGHTS_VERSION = 5; // bump: frases exactas por enumeración, sin IA en el tablón
+const HIGHLIGHTS_VERSION = 6; // bump: hipótesis integrales (ganar grupo, caer último) + estilista IA validado
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
 const MAX_REMAINING_TO_ENUMERATE = 5; // 14^5 ≈ 540k escenarios, <2s
@@ -12,6 +20,10 @@ function standingsHash(standings) {
     .join('|');
   return crypto.createHash('md5').update(str).digest('hex').slice(0, 8);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Utilidades de enumeración
+// ─────────────────────────────────────────────────────────────────────────────
 
 function getRemainingCount(players, groupMatches) {
   const groupSize = players.length;
@@ -77,6 +89,9 @@ function enumerateAllOutcomes(remainingPairs) {
   return outcomes;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Redacción determinista de condiciones de marcador
+// ─────────────────────────────────────────────────────────────────────────────
 
 function scoreLabel(s) { return `${s[0]}-${s[1]}`; }
 
@@ -84,84 +99,182 @@ function listToText(arr) {
   return arr.length === 1 ? arr[0] : arr.slice(0, -1).join(', ') + ' o ' + arr[arr.length - 1];
 }
 
-// Convierte un conjunto de marcadores ganadores en una frase exacta.
+// Convierte un conjunto de marcadores ganadores en una condición exacta.
 // Solo usa "por X-Y o más" cuando el conjunto coincide EXACTAMENTE con
-// {marcadores con margen >= m}; si no, enumera los marcadores válidos.
-function phraseWinningScores(qualifying) {
+// {marcadores con margen >= m}; si no, enumera o usa "salvo X".
+function condSuffix(qualifying) {
   if (qualifying.length === 0) return null;
-  if (qualifying.length === TENNIS_SCORES.length) return { any: true };
+  if (qualifying.length === TENNIS_SCORES.length) return '';        // cualquier marcador
+  if (qualifying.length === 1) return ` exactamente ${scoreLabel(qualifying[0])}`;
+  if (qualifying.length === TENNIS_SCORES.length - 1) {
+    const falta = TENNIS_SCORES.find(s => !qualifying.some(q => q[0] === s[0] && q[1] === s[1]));
+    return ` con cualquier marcador salvo ${scoreLabel(falta)}`;
+  }
   const minMargin = Math.min(...qualifying.map(s => s[0] - s[1]));
   const marginSet = TENNIS_SCORES.filter(s => s[0] - s[1] >= minMargin);
   const sameSet = marginSet.length === qualifying.length &&
     marginSet.every(s => qualifying.some(q => q[0] === s[0] && q[1] === s[1]));
   if (sameSet) {
     const rep = qualifying.filter(s => s[0] - s[1] === minMargin).sort((a, b) => a[0] - b[0])[0];
-    return { any: false, marginRule: true, rep };
+    return ` por ${scoreLabel(rep)} o más`;
   }
-  return { any: false, marginRule: false, list: qualifying.map(scoreLabel) };
+  return ` ${listToText(qualifying.map(scoreLabel))}`;
 }
 
-function winCondText(qual, oppName) {
-  const ph = phraseWinningScores(qual);
-  if (!ph) return null;
-  if (ph.any) return `gana a ${oppName}, con cualquier marcador`;
-  if (qual.length === 1) return `gana a ${oppName} exactamente ${scoreLabel(qual[0])}`;
-  if (qual.length === TENNIS_SCORES.length - 1) {
-    const falta = TENNIS_SCORES.find(s => !qual.some(q => q[0] === s[0] && q[1] === s[1]));
-    return `gana a ${oppName} con cualquier marcador salvo ${scoreLabel(falta)}`;
-  }
-  if (ph.marginRule) return `gana a ${oppName} por ${scoreLabel(ph.rep)} o más`;
-  return `gana a ${oppName} ${ph.list.length === 1 ? 'exactamente ' : ''}${listToText(ph.list)}`;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+//  Análisis con 1 partido pendiente: hechos integrales por enumeración exacta
+// ─────────────────────────────────────────────────────────────────────────────
 
 function analyze1MatchPredictions(standings, pair, finals, outcomes) {
   const n = standings.length;
   const [pA, pB] = pair;
-  const insights = [];
-  const first = standings[0], second = standings[1], last = standings[n - 1];
+  const leader = standings[0];
+  const last = standings[n - 1];
+  const confirmed = [];
+  const predictions = [];
 
-  // Marcadores con los que `playerId` gana y se cumple `pred` sobre la clasificación final
-  const qualScores = (playerId, pred) => {
+  // Marcadores (perspectiva del ganador `winnerId`) que cumplen `pred`
+  const scoresWhere = (winnerId, pred) => {
     const qual = [];
     for (let i = 0; i < outcomes.length; i++) {
       const o = outcomes[i][0];
-      if (o.winnerId === playerId && pred(finals[i])) qual.push([o.wGames, o.lGames]);
+      if (o.winnerId === winnerId && pred(finals[i])) qual.push([o.wGames, o.lGames]);
     }
     return qual;
   };
 
-  // --- ÚLTIMO: ¿puede escapar el actual último? ---
-  if (pA.id === last.id || pB.id === last.id) {
+  // Certezas por enumeración (más finas que la cota de puntos)
+  const firstCount = {}, lastCount = {};
+  for (const p of standings) { firstCount[p.id] = 0; lastCount[p.id] = 0; }
+  for (const f of finals) { firstCount[f[0].id]++; lastCount[f[n - 1].id]++; }
+  const total = finals.length;
+
+  if (firstCount[leader.id] === total) {
+    confirmed.push({
+      type: 'confirmed_first', player: leader.name,
+      text: `${leader.name} terminará primero de grupo, pase lo que pase en el partido pendiente.`,
+    });
+  }
+  if (lastCount[last.id] === total) {
+    confirmed.push({
+      type: 'confirmed_last', player: last.name,
+      text: `${last.name} terminará último de grupo, pase lo que pase en el partido pendiente.`,
+    });
+  }
+
+  // 1) ¿Alguien de los que juegan puede GANAR EL GRUPO?
+  for (const X of [pA, pB]) {
+    if (X.id === leader.id) continue;
+    const opp = X.id === pA.id ? pB : pA;
+    const qFirst = scoresWhere(X.id, f => f[0].id === X.id);
+    if (qFirst.length === 0) continue;
+
+    if (X.id === last.id) {
+      const qEscape = scoresWhere(X.id, f => f[n - 1].id !== X.id);
+      const sufF = condSuffix(qFirst);
+      if (qEscape.length === TENNIS_SCORES.length && qFirst.length === TENNIS_SCORES.length) {
+        predictions.push({
+          type: 'conditional_first', player: X.name,
+          text: `${X.name}, ahora último, no solo se salvaría: gana el grupo si vence a ${opp.name}, con cualquier marcador.`,
+        });
+      } else if (qEscape.length === TENNIS_SCORES.length) {
+        predictions.push({
+          type: 'conditional_first', player: X.name,
+          text: `${X.name}, ahora último, se salva con cualquier victoria sobre ${opp.name} — y si gana${sufF}, se lleva el grupo.`,
+        });
+      } else {
+        predictions.push({
+          type: 'conditional_first', player: X.name,
+          text: `${X.name} se salva del último puesto si gana a ${opp.name}${condSuffix(qEscape)}, y ganando${sufF} sería además primero.`,
+        });
+      }
+    } else {
+      predictions.push({
+        type: 'conditional_first', player: X.name,
+        text: `${X.name} gana el grupo si vence a ${opp.name}${condSuffix(qFirst)}.`,
+      });
+    }
+  }
+
+  // 2) Escape del último cuando NO tiene opción de ganar el grupo
+  if ((pA.id === last.id || pB.id === last.id) && firstCount[last.id] === 0) {
     const opp = pA.id === last.id ? pB : pA;
-    const qual = qualScores(last.id, f => f[n - 1].id !== last.id);
-    if (qual.length > 0) {
-      insights.push({
+    const qEscape = scoresWhere(last.id, f => f[n - 1].id !== last.id);
+    if (qEscape.length > 0) {
+      predictions.push({
         type: 'conditional_safe', player: last.name,
-        text: `${last.name} se salva del último puesto si ${winCondText(qual, opp.name)}.`,
+        text: `${last.name} se salva del último puesto si gana a ${opp.name}${condSuffix(qEscape)}.`,
       });
     }
   }
 
-  // --- PRIMERO: ¿puede el segundo arrebatar el primer puesto? ---
-  if (pA.id === second.id || pB.id === second.id) {
-    const opp = pA.id === second.id ? pB : pA;
-    const qual = qualScores(second.id, f => f[0].id === second.id);
-    if (qual.length > 0) {
-      insights.push({
-        type: 'conditional_first', player: first.name,
-        text: `${first.name} pierde el primer puesto si ${second.name} ${winCondText(qual, opp.name)}.`,
+  // 3) ¿Alguien que NO es último puede CAER a último?
+  for (const O of standings) {
+    if (O.id === last.id || lastCount[O.id] === 0 || lastCount[O.id] === total) continue;
+    // Desenlaces en que O acaba último, partidos por ganador del partido pendiente
+    const porGanador = [];
+    for (const W of [pA, pB]) {
+      const qual = scoresWhere(W.id, f => f[n - 1].id === O.id);
+      if (qual.length > 0) porGanador.push({ W, qual });
+    }
+    if (porGanador.length === 0) continue;
+    const trozos = porGanador.map(({ W, qual }) => {
+      const L = W.id === pA.id ? pB : pA;
+      return `${W.name} gana a ${L.name}${condSuffix(qual)}`;
+    });
+    predictions.push({
+      type: 'conditional_last', player: O.name,
+      text: `${O.name} caería al último puesto si ${trozos.join(' o si ')}.`,
+    });
+  }
+
+  // 4) El líder actual: ¿mantiene el liderato incluso perdiendo?
+  if ((pA.id === leader.id || pB.id === leader.id) && firstCount[leader.id] < total) {
+    const opp = pA.id === leader.id ? pB : pA;
+    const qLoseSafe = scoresWhere(opp.id, f => f[0].id === leader.id); // el rival gana pero el líder sigue 1º
+    if (qLoseSafe.length > 0) {
+      predictions.push({
+        type: 'conditional_first', player: leader.name,
+        text: `${leader.name} seguiría primero incluso si ${opp.name} le gana${condSuffix(qLoseSafe)}.`,
       });
     }
   }
 
-  return insights;
+  return { confirmed, predictions };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Análisis con 2-5 partidos pendientes
+// ─────────────────────────────────────────────────────────────────────────────
 
 function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total) {
   const n = standings.length;
   const leader = standings[0];
   const last = standings[n - 1];
-  const insights = [];
+  const confirmed = [];
+  const predictions = [];
+
+  // Certezas por enumeración
+  if (firstCount[leader.id] === total) {
+    confirmed.push({
+      type: 'confirmed_first', player: leader.name,
+      text: `${leader.name} terminará primero de grupo, pase lo que pase en los partidos pendientes.`,
+    });
+  }
+  if (lastCount[last.id] === total) {
+    confirmed.push({
+      type: 'confirmed_last', player: last.name,
+      text: `${last.name} terminará último de grupo, pase lo que pase en los partidos pendientes.`,
+    });
+  }
+
+  // El último, ¿sigue vivo incluso para ganar el grupo?
+  if (firstCount[last.id] > 0) {
+    predictions.push({
+      type: 'conditional_first', player: last.name,
+      text: `${last.name}, ahora último, sigue con opciones incluso de ganar el grupo.`,
+    });
+  }
 
   // --- AMENAZA AL PRIMER PUESTO ---
   let topChallenger = null, topCount = 0;
@@ -169,11 +282,10 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
     if (firstCount[p.id] > topCount) { topCount = firstCount[p.id]; topChallenger = p; }
   }
 
-  if (topChallenger && topCount > 0) {
+  if (topChallenger && topCount > 0 && firstCount[leader.id] < total) {
     const cPairs = remainingPairs.filter(([p1, p2]) => p1.id === topChallenger.id || p2.id === topChallenger.id);
     const vsLeaderPair = cPairs.find(([p1, p2]) => p1.id === leader.id || p2.id === leader.id);
 
-    // Analizar la rama "gana todos sus partidos" — cubre el escenario dominante
     let winsAllCount = 0, winsAllTakes1st = 0;
     for (let i = 0; i < allOutcomes.length; i++) {
       const winsAll = cPairs.every(([p1, p2]) => {
@@ -188,62 +300,57 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
       if (finals[i][0].id === topChallenger.id) winsAllTakes1st++;
     }
 
-    if (winsAllTakes1st > 0 && vsLeaderPair) {
-      if (winsAllTakes1st === winsAllCount) {
-        // Ganar todos SIEMPRE lleva al 1º → condición limpia sin umbral de margen
-        const oppNames = cPairs.map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name).join(' y ');
-        insights.push({
+    if (winsAllTakes1st > 0 && winsAllTakes1st === winsAllCount) {
+      const oppNames = cPairs.map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name).join(' y ');
+      predictions.push({
+        type: 'conditional_first', player: leader.name,
+        text: `${leader.name} pierde el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos (${oppNames}).`,
+      });
+    } else if (winsAllTakes1st > 0 && vsLeaderPair) {
+      // Para cada marcador del cara a cara, ¿ganar todos GARANTIZA el vuelco?
+      const perScore = new Map();
+      for (let i = 0; i < allOutcomes.length; i++) {
+        const winsAll = cPairs.every(([p1, p2]) => {
+          const oc = allOutcomes[i].find(x =>
+            (x.winnerId === p1.id && x.loserId === p2.id) ||
+            (x.winnerId === p2.id && x.loserId === p1.id)
+          );
+          return oc && oc.winnerId === topChallenger.id;
+        });
+        if (!winsAll) continue;
+        const h2h = allOutcomes[i].find(x =>
+          (x.winnerId === topChallenger.id && x.loserId === leader.id) ||
+          (x.winnerId === leader.id && x.loserId === topChallenger.id)
+        );
+        if (!h2h) continue;
+        const key = `${h2h.wGames}-${h2h.lGames}`;
+        const e = perScore.get(key) || { tot: 0, first: 0 };
+        e.tot++;
+        if (finals[i][0].id === topChallenger.id) e.first++;
+        perScore.set(key, e);
+      }
+      const alwaysSet = TENNIS_SCORES.filter(s => {
+        const e = perScore.get(scoreLabel(s));
+        return e && e.first === e.tot;
+      });
+      const otherOpps = cPairs
+        .filter(([p1, p2]) => p1.id !== leader.id && p2.id !== leader.id)
+        .map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name);
+      const extra = otherOpps.length > 0 ? ` y además gana a ${otherOpps.join(' y ')}` : '';
+      if (alwaysSet.length > 0) {
+        predictions.push({
           type: 'conditional_first', player: leader.name,
-          text: `${leader.name} pierde el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos (${oppNames}).`,
+          text: `${leader.name} pierde el primer puesto si ${topChallenger.name} le gana${condSuffix(alwaysSet)}${extra}.`,
         });
       } else {
-        // Ganar todos no siempre basta: el marcador contra el líder decide.
-        // Para cada marcador h2h, ¿ganar todos GARANTIZA el 1º (en todos los sub-escenarios)?
-        const perScore = new Map();
-        for (let i = 0; i < allOutcomes.length; i++) {
-          const winsAll = cPairs.every(([p1, p2]) => {
-            const oc = allOutcomes[i].find(x =>
-              (x.winnerId === p1.id && x.loserId === p2.id) ||
-              (x.winnerId === p2.id && x.loserId === p1.id)
-            );
-            return oc && oc.winnerId === topChallenger.id;
-          });
-          if (!winsAll) continue;
-          const h2h = allOutcomes[i].find(x =>
-            (x.winnerId === topChallenger.id && x.loserId === leader.id) ||
-            (x.winnerId === leader.id && x.loserId === topChallenger.id)
-          );
-          if (!h2h) continue;
-          const key = `${h2h.wGames}-${h2h.lGames}`;
-          const e = perScore.get(key) || { tot: 0, first: 0 };
-          e.tot++;
-          if (finals[i][0].id === topChallenger.id) e.first++;
-          perScore.set(key, e);
-        }
-        const alwaysSet = TENNIS_SCORES.filter(s => {
-          const e = perScore.get(scoreLabel(s));
-          return e && e.first === e.tot;
+        predictions.push({
+          type: 'conditional_first', player: leader.name,
+          text: `${leader.name} podría perder el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos, según los demás resultados.`,
         });
-        const otherOpps = cPairs
-          .filter(([p1, p2]) => p1.id !== leader.id && p2.id !== leader.id)
-          .map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name);
-        const extra = otherOpps.length > 0 ? ` y además gana a ${otherOpps.join(' y ')}` : '';
-        if (alwaysSet.length > 0) {
-          insights.push({
-            type: 'conditional_first', player: leader.name,
-            text: `${leader.name} pierde el primer puesto si ${topChallenger.name} le ${winCondText(alwaysSet, leader.name).replace(`gana a ${leader.name}`, 'gana')}${extra}.`,
-          });
-        } else {
-          insights.push({
-            type: 'conditional_first', player: leader.name,
-            text: `${leader.name} podría perder el primer puesto si ${topChallenger.name} gana sus ${cPairs.length} partidos, según los demás resultados.`,
-          });
-        }
       }
     } else if (topCount > 0) {
-      // Sin partido directo contra el líder, o casos sin "gana todos" suficiente → mensaje genérico
       const oppNames = cPairs.map(([p1, p2]) => (p1.id === topChallenger.id ? p2 : p1).name).join(' y ');
-      insights.push({
+      predictions.push({
         type: 'conditional_first', player: leader.name,
         text: `${leader.name} podría perder el primer puesto: ${topChallenger.name} tiene opciones ganando a ${oppNames}.`,
       });
@@ -251,10 +358,9 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
   }
 
   // --- ESCAPE DEL ÚLTIMO PUESTO ---
-  if (lastCount[last.id] < total) {
+  if (lastCount[last.id] < total && firstCount[last.id] === 0) {
     const lastPairs = remainingPairs.filter(([p1, p2]) => p1.id === last.id || p2.id === last.id);
     if (lastPairs.length > 0) {
-      // ¿Hay algún escenario en que el último gana un partido pero sigue siendo último?
       let winsButStillLast = false;
       for (let i = 0; i < allOutcomes.length; i++) {
         if (finals[i][n - 1].id !== last.id) continue;
@@ -268,19 +374,117 @@ function analyzeMultiMatchPredictions(standings, remainingPairs, allOutcomes, fi
         if (winsAny) { winsButStillLast = true; break; }
       }
       const oppNames = lastPairs.map(([p1, p2]) => (p1.id === last.id ? p2 : p1).name).join(' o ');
-      insights.push({
+      predictions.push({
         type: 'conditional_safe', player: last.name,
         text: winsButStillLast
-          ? `${last.name} tiene opciones de escapar del último ganando con suficiente margen a ${oppNames}.`
-          : `${last.name} se salva del último si gana a ${oppNames}.`,
+          ? `${last.name} tiene opciones de escapar del último puesto ganando con suficiente margen a ${oppNames}.`
+          : `${last.name} se salva del último puesto si gana a ${oppNames}.`,
       });
     }
   }
 
-  return insights;
+  // --- RIESGO DE CAER AL ÚLTIMO (el peor clasificado no-último con riesgo real) ---
+  for (const O of standings) {
+    if (O.id === last.id || lastCount[O.id] === 0 || lastCount[O.id] === total) continue;
+  }
+  const enRiesgo = [...standings].reverse().find(O =>
+    O.id !== last.id && lastCount[O.id] > 0 && lastCount[O.id] < total
+  );
+  if (enRiesgo) {
+    predictions.push({
+      type: 'conditional_last', player: enRiesgo.name,
+      text: `${enRiesgo.name} todavía podría caer al último puesto, según los resultados pendientes.`,
+    });
+  }
+
+  return { confirmed, predictions };
 }
 
-function computeHighlights(allStandings, allMatches, cached) {
+// ─────────────────────────────────────────────────────────────────────────────
+//  Estilista IA (opcional): re-redacta las frases deterministas y se valida.
+//  Si la validación falla o la API no responde, se publican las plantillas.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function extractScores(text) {
+  return (text.match(/\b\d-\d\b/g) || []).sort();
+}
+
+function mentionedPlayers(text, groupNames) {
+  return groupNames.filter(nm => text.includes(nm)).sort();
+}
+
+function validateStyled(styled, source, groupNames) {
+  if (typeof styled !== 'string' || styled.length < 10 || styled.length > 220) return false;
+  if (/%|probab|quizá|seguramente|posiblemente/i.test(styled)) return false;
+  // Fidelidad: mismos marcadores exactos y mismos jugadores mencionados
+  if (JSON.stringify(extractScores(styled)) !== JSON.stringify(extractScores(source))) return false;
+  if (JSON.stringify(mentionedPlayers(styled, groupNames)) !== JSON.stringify(mentionedPlayers(source, groupNames))) return false;
+  return true;
+}
+
+async function styleWithAI(groupNum, items, groupNames) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey || process.env.TABLON_AI === '0' || items.length === 0) return items;
+
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
+  const prompt = `Reescribe estas frases de un tablón de torneo de tenis entre amigos para que suenen naturales en español, tono neutro de crónica deportiva.
+REGLAS ESTRICTAS: conserva exactamente los mismos jugadores, los mismos marcadores (ej. 6-0, 7-5) y las mismas condiciones lógicas. No añadas probabilidades, números ni jugadores. Una frase por entrada, máximo 200 caracteres.
+
+${items.map((it, i) => `${i}: ${it.text}`).join('\n')}
+
+Responde SOLO con JSON: {"items":[{"i":0,"text":"..."}]}`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' },
+        max_tokens: 500,
+      }),
+    });
+    if (!res.ok) {
+      console.error(`styleWithAI: OpenRouter HTTP ${res.status} (grupo ${groupNum}, modelo ${model})`);
+      return items;
+    }
+    const data = await res.json();
+    let content = data.choices?.[0]?.message?.content;
+    if (!content) return items;
+    content = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const parsed = JSON.parse(content);
+    const styledMap = new Map((parsed.items || []).map(x => [x.i, x.text]));
+    return items.map((it, i) => {
+      const styled = styledMap.get(i);
+      return styled && validateStyled(styled, it.text, groupNames)
+        ? { ...it, text: styled, styled: true }
+        : it;
+    });
+  } catch (e) {
+    console.error(`styleWithAI error (grupo ${groupNum}):`, e.message);
+    return items;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Orquestación
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PRED_ORDER = { conditional_first: 0, conditional_safe: 1, conditional_last: 2 };
+const MAX_PREDICTIONS_PER_GROUP = 4;
+
+function dedupe(items) {
+  const seen = new Set();
+  return items.filter(it => {
+    const k = `${it.type}|${it.player}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+async function computeHighlights(allStandings, allMatches, cached) {
   const currentHash = standingsHash(allStandings);
   if (cached?.hash === currentHash && cached?.version === HIGHLIGHTS_VERSION) return cached;
 
@@ -300,31 +504,26 @@ function computeHighlights(allStandings, allMatches, cached) {
     const last = standings[n - 1];
     const secondToLast = standings[n - 2];
 
-    const confirmed = [];
+    let confirmed = [];
+    let predictions = [];
 
-    // Primero matemático
+    // Certezas por cota de puntos (válidas aunque no se pueda enumerar)
     const maxChallenger = Math.max(...standings.slice(1).map(p =>
       p.points + remaining[p.id] * MAX_WIN_PTS
     ));
-    const confirmedFirst = leader.points > maxChallenger;
-    if (confirmedFirst) {
+    if (leader.points > maxChallenger) {
       confirmed.push({
         type: 'confirmed_first', player: leader.name,
         text: `${leader.name} está matemáticamente clasificado como primero de grupo.`,
       });
     }
-
-    // Último matemático
     const lastMax = last.points + remaining[last.id] * MAX_WIN_PTS;
-    const confirmedLast = secondToLast.points > lastMax;
-    if (confirmedLast) {
+    if (secondToLast.points > lastMax) {
       confirmed.push({
         type: 'confirmed_last', player: last.name,
         text: `${last.name} no puede evitar terminar último de grupo.`,
       });
     }
-
-    // Salvado matemático: solo tiene sentido si quedan partidos
     if (n >= 3 && remainingPairs.length > 0) {
       const thirdToLast = standings[n - 3];
       if (thirdToLast && thirdToLast.points > lastMax) {
@@ -335,31 +534,35 @@ function computeHighlights(allStandings, allMatches, cached) {
       }
     }
 
-    // Predicciones por enumeración de escenarios
-    const predictions = [];
-    const canEnumerate = remainingPairs.length > 0 && remainingPairs.length <= MAX_REMAINING_TO_ENUMERATE;
-    const hasOpenQuestions = !confirmedFirst || !confirmedLast;
-
-    if (canEnumerate && hasOpenQuestions) {
+    // Hipótesis por enumeración exhaustiva
+    if (remainingPairs.length > 0 && remainingPairs.length <= MAX_REMAINING_TO_ENUMERATE) {
       const allOutcomes = enumerateAllOutcomes(remainingPairs);
       const finals = allOutcomes.map(o => simulateFinalStandings(standings, o));
       const total = allOutcomes.length;
 
+      let result;
       if (remainingPairs.length === 1) {
-        // Umbral exacto, sin IA
-        predictions.push(...analyze1MatchPredictions(standings, remainingPairs[0], finals, allOutcomes));
+        result = analyze1MatchPredictions(standings, remainingPairs[0], finals, allOutcomes);
       } else {
-        // 2-4 partidos: análisis determinista siempre; IA solo como fallback si no hay nada
         const firstCount = {}, lastCount = {};
         for (const p of standings) { firstCount[p.id] = 0; lastCount[p.id] = 0; }
         for (const f of finals) { firstCount[f[0].id]++; lastCount[f[n - 1].id]++; }
-
-        predictions.push(...analyzeMultiMatchPredictions(
+        result = analyzeMultiMatchPredictions(
           standings, remainingPairs, allOutcomes, finals, firstCount, lastCount, total
-        ));
-
+        );
       }
+      confirmed.push(...result.confirmed);
+      predictions.push(...result.predictions);
     }
+
+    confirmed = dedupe(confirmed);
+    predictions = dedupe(predictions)
+      .sort((a, b) => (PRED_ORDER[a.type] ?? 9) - (PRED_ORDER[b.type] ?? 9))
+      .slice(0, MAX_PREDICTIONS_PER_GROUP);
+
+    // Capa de redacción natural (opcional, validada, con fallback)
+    const groupNames = standings.map(p => p.name);
+    predictions = await styleWithAI(groupNum, predictions, groupNames);
 
     highlights[groupNum] = { confirmed, predictions };
   }
