@@ -615,19 +615,25 @@
         {
           "type": "conditional_first",
           "player": "Pablo",
-          "text": "Pablo, actualmente último, se clasifica si vence a Raul, y gana el grupo salvo si pierde 7-6.",
+          "text": "Si Pablo gana a Raul con cualquier marcador menos 7-6, entonces Pablo gana el grupo.",
           "styled": true
         },
         {
           "type": "conditional_first",
           "player": "Raul",
-          "text": "Raul mantiene la primera posición incluso si Pablo le derrota con marcador de 7-6.",
+          "text": "Si Raul gana a Pablo con cualquier marcador, entonces Raul es primero. Si Raul pierde 7-6, entonces Raul también es primero.",
+          "styled": true
+        },
+        {
+          "type": "conditional_safe",
+          "player": "Pablo",
+          "text": "Si Raul gana a Pablo por 6-1 o más, entonces Pablo acaba último. Si el marcador es otro, entonces Pablo no acaba último.",
           "styled": true
         },
         {
           "type": "conditional_last",
           "player": "Pepe",
-          "text": "Pepe desciende al último lugar si Raul vence a Pablo 6-2, 6-3, 6-4, 7-5 o 7-6, o si Pablo gana.",
+          "text": "Si Raul gana a Pablo por 6-1 o más, entonces Pepe no acaba último. Si el marcador es otro, entonces Pepe acaba último.",
           "styled": true
         }
       ]
@@ -644,13 +650,13 @@
         {
           "type": "conditional_safe",
           "player": "Sergio",
-          "text": "Sergio evitará el último puesto si derrota a Jorge con un marcador de 6-1 o superior.",
+          "text": "Si Sergio le gana a Jorge 6-1 o con mayor diferencia, entonces Sergio no queda último.",
           "styled": true
         },
         {
           "type": "conditional_last",
           "player": "Jorge",
-          "text": "Jorge descenderá al último puesto si Sergio lo vence con un marcador de 6-1 o superior.",
+          "text": "Si Sergio le gana a Jorge 6-1 o con mayor diferencia, entonces Jorge queda último.",
           "styled": true
         }
       ]
@@ -672,7 +678,7 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Chus perderá el liderato si Carlos DM lo vence 6-2 o con mayor diferencia y además derrota a Jacobo.",
+          "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM gana a Jacobo, entonces Chus pierde el primer puesto.",
           "styled": true
         }
       ]
@@ -684,7 +690,7 @@
   },
   "highlightsCache": {
     "hash": "bbdae394",
-    "version": 6,
+    "version": 7,
     "highlights": {
       "1": {
         "confirmed": [],
@@ -692,19 +698,25 @@
           {
             "type": "conditional_first",
             "player": "Pablo",
-            "text": "Pablo, actualmente último, se clasifica si vence a Raul, y gana el grupo salvo si pierde 7-6.",
+            "text": "Si Pablo gana a Raul con cualquier marcador menos 7-6, entonces Pablo gana el grupo.",
             "styled": true
           },
           {
             "type": "conditional_first",
             "player": "Raul",
-            "text": "Raul mantiene la primera posición incluso si Pablo le derrota con marcador de 7-6.",
+            "text": "Si Raul gana a Pablo con cualquier marcador, entonces Raul es primero. Si Raul pierde 7-6, entonces Raul también es primero.",
+            "styled": true
+          },
+          {
+            "type": "conditional_safe",
+            "player": "Pablo",
+            "text": "Si Raul gana a Pablo por 6-1 o más, entonces Pablo acaba último. Si el marcador es otro, entonces Pablo no acaba último.",
             "styled": true
           },
           {
             "type": "conditional_last",
             "player": "Pepe",
-            "text": "Pepe desciende al último lugar si Raul vence a Pablo 6-2, 6-3, 6-4, 7-5 o 7-6, o si Pablo gana.",
+            "text": "Si Raul gana a Pablo por 6-1 o más, entonces Pepe no acaba último. Si el marcador es otro, entonces Pepe acaba último.",
             "styled": true
           }
         ]
@@ -721,13 +733,13 @@
           {
             "type": "conditional_safe",
             "player": "Sergio",
-            "text": "Sergio evitará el último puesto si derrota a Jorge con un marcador de 6-1 o superior.",
+            "text": "Si Sergio le gana a Jorge 6-1 o con mayor diferencia, entonces Sergio no queda último.",
             "styled": true
           },
           {
             "type": "conditional_last",
             "player": "Jorge",
-            "text": "Jorge descenderá al último puesto si Sergio lo vence con un marcador de 6-1 o superior.",
+            "text": "Si Sergio le gana a Jorge 6-1 o con mayor diferencia, entonces Jorge queda último.",
             "styled": true
           }
         ]
@@ -749,7 +761,7 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Chus perderá el liderato si Carlos DM lo vence 6-2 o con mayor diferencia y además derrota a Jacobo.",
+            "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM gana a Jacobo, entonces Chus pierde el primer puesto.",
             "styled": true
           }
         ]
@@ -760,5 +772,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T13:44:15.661Z"
+  "updatedAt": "2026-07-30T13:50:57.390Z"
 }
