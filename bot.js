@@ -31,7 +31,6 @@ console.log('🤖 Bot de Telegram iniciado');
 
 function formatStandings(standings) {
   const groupNames = { 1: 'GRUPO 1', 2: 'GRUPO 2', 3: 'GRUPO 3', 4: 'GRUPO 4' };
-  const medals = ['🥇', '🥈', '🥉', '🔻'];
 
   let text = '';
   for (const [g, players] of Object.entries(standings)) {
@@ -140,8 +139,7 @@ function saveMatch({ chatId, p1, p2, parsed, senderName, raw_input }) {
 }
 
 bot.onText(/\/reinicio/, (msg) => {
-  const { getRecentMatches: getAll } = require('./db');
-  const count = getAll(1000).length;
+  const count = getRecentMatches(1000).length;
   pendingReinicio.add(msg.chat.id);
   bot.sendMessage(msg.chat.id,
     `⚠️ *REINICIO DEL TORNEO*\n\nEsto borrará los *${count} partidos* registrados y dejará la clasificación a cero.\n\nResponde /confirmar para continuar o /no para cancelar.`,
