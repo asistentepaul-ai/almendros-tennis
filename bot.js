@@ -2,10 +2,12 @@ const TelegramBot = require('node-telegram-bot-api');
 const { exec } = require('child_process');
 const path = require('path');
 const { parseMatchResult } = require('./parser');
-const { findPlayer, findPlayerExact, addMatch, deleteMatch, matchExists, getStandings, getRecentMatches, getAllPlayers } = require('./db');
+const { findPlayer, findPlayerExact, addMatch, deleteMatch, clearMatches, matchExists, getStandings, getRecentMatches, getAllPlayers } = require('./db');
 
 // Pending overwrite requests: chatId -> { matchId, newMatchData, p1, p2, parsed }
 const pendingOverwrites = new Map();
+// Pending reinicio confirmations: Set of chatIds
+const pendingReinicio = new Set();
 
 function triggerSync() {
   const script = path.join(__dirname, 'sync-to-github.sh');
@@ -35,7 +37,7 @@ function formatStandings(standings) {
   for (const [g, players] of Object.entries(standings)) {
     text += `\n*${groupNames[g]}*\n`;
     players.forEach((p, i) => {
-      const medal = medals[Math.min(i, players.length - 1 === i && i > 0 ? 3 : i)] || '·';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i === players.length - 1 ? '🔻' : '·';
       text += `${medal} ${p.name} — ${p.points}pts (${p.wins}V/${p.losses}D, ${p.gamesWon}JG)\n`;
     });
   }
@@ -137,6 +139,24 @@ function saveMatch({ chatId, p1, p2, parsed, senderName, raw_input }) {
   );
 }
 
+bot.onText(/\/reinicio/, (msg) => {
+  const { getRecentMatches: getAll } = require('./db');
+  const count = getAll(1000).length;
+  pendingReinicio.add(msg.chat.id);
+  bot.sendMessage(msg.chat.id,
+    `⚠️ *REINICIO DEL TORNEO*\n\nEsto borrará los *${count} partidos* registrados y dejará la clasificación a cero.\n\nResponde /confirmar para continuar o /no para cancelar.`,
+    { parse_mode: 'Markdown' }
+  );
+});
+
+bot.onText(/\/confirmar/, (msg) => {
+  if (!pendingReinicio.has(msg.chat.id)) return;
+  pendingReinicio.delete(msg.chat.id);
+  clearMatches();
+  triggerSync();
+  bot.sendMessage(msg.chat.id, '✅ Torneo reiniciado. Todos los partidos han sido borrados.');
+});
+
 bot.onText(/\/si/, (msg) => {
   const pending = pendingOverwrites.get(msg.chat.id);
   if (!pending) return;
@@ -146,9 +166,14 @@ bot.onText(/\/si/, (msg) => {
 });
 
 bot.onText(/\/no/, (msg) => {
-  if (!pendingOverwrites.has(msg.chat.id)) return;
-  pendingOverwrites.delete(msg.chat.id);
-  bot.sendMessage(msg.chat.id, '↩️ Operación cancelada. El resultado anterior se mantiene.');
+  if (pendingReinicio.has(msg.chat.id)) {
+    pendingReinicio.delete(msg.chat.id);
+    return bot.sendMessage(msg.chat.id, '↩️ Reinicio cancelado. Los datos se mantienen intactos.');
+  }
+  if (pendingOverwrites.has(msg.chat.id)) {
+    pendingOverwrites.delete(msg.chat.id);
+    return bot.sendMessage(msg.chat.id, '↩️ Operación cancelada. El resultado anterior se mantiene.');
+  }
 });
 
 bot.onText(/\/clasificacion/, (msg) => {

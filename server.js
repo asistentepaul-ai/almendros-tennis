@@ -118,6 +118,7 @@ app.post('/api/matches', (req, res) => {
 // Delete match (admin)
 app.delete('/api/matches/:id', (req, res) => {
   deleteMatch(parseInt(req.params.id));
+  triggerSync();
   res.json({ success: true });
 });
 

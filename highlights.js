@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 
+const HIGHLIGHTS_VERSION = 3; // incrementar para invalidar caché al cambiar lógica
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
 const MAX_REMAINING_TO_ENUMERATE = 4;
@@ -207,7 +208,7 @@ Formato: {"highlights": [{"type": "conditional_first"|"conditional_safe", "playe
 
 async function computeHighlights(allStandings, allMatches, cached) {
   const currentHash = standingsHash(allStandings);
-  if (cached?.hash === currentHash) return cached;
+  if (cached?.hash === currentHash && cached?.version === HIGHLIGHTS_VERSION) return cached;
 
   const apiKey = process.env.OPENROUTER_API_KEY;
   const highlights = {};
@@ -217,7 +218,7 @@ async function computeHighlights(allStandings, allMatches, cached) {
     if (n < 2) { highlights[groupNum] = { confirmed: [], predictions: [] }; continue; }
 
     const groupIds = new Set(standings.map(p => p.id));
-    const groupMatches = allMatches.filter(m => groupIds.has(m.player1_id));
+    const groupMatches = allMatches.filter(m => groupIds.has(m.player1_id) && groupIds.has(m.player2_id));
     const groupPlayers = standings.map(p => ({ id: p.id, name: p.name }));
     const remaining = getRemainingCount(groupPlayers, groupMatches);
     const remainingPairs = getRemainingPairs(groupPlayers, groupMatches);
@@ -250,8 +251,8 @@ async function computeHighlights(allStandings, allMatches, cached) {
       });
     }
 
-    // Salvado matemático
-    if (n >= 3) {
+    // Salvado matemático: solo tiene sentido si quedan partidos
+    if (n >= 3 && remainingPairs.length > 0) {
       const thirdToLast = standings[n - 3];
       if (thirdToLast && thirdToLast.points > lastMax) {
         confirmed.push({
@@ -292,7 +293,7 @@ async function computeHighlights(allStandings, allMatches, cached) {
     highlights[groupNum] = { confirmed, predictions };
   }
 
-  return { highlights, hash: currentHash };
+  return { highlights, hash: currentHash, version: HIGHLIGHTS_VERSION };
 }
 
 module.exports = { computeHighlights, standingsHash };
