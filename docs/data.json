@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 22,
+      "player1_id": 5,
+      "player2_id": 7,
+      "player1_games": 6,
+      "player2_games": 3,
+      "winner_id": 5,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T14:04:18.325Z",
+      "raw_input": "sergio gana. jorge 6 3",
+      "added_by": "Pablo",
+      "player1_name": "Sergio",
+      "player2_name": "Jorge",
+      "winner_name": "Sergio",
+      "group_number": 2
+    },
+    {
       "id": 21,
       "player1_id": 7,
       "player2_id": 6,
@@ -459,6 +476,18 @@
         "points": 24
       },
       {
+        "id": 7,
+        "name": "Jorge",
+        "group_number": 2,
+        "matchesPlayed": 3,
+        "wins": 1,
+        "losses": 2,
+        "gamesWon": 11,
+        "gamesLost": 15,
+        "gamesDiff": -4,
+        "points": 13
+      },
+      {
         "id": 8,
         "name": "Alex",
         "group_number": 2,
@@ -471,28 +500,16 @@
         "points": 12
       },
       {
-        "id": 7,
-        "name": "Jorge",
-        "group_number": 2,
-        "matchesPlayed": 2,
-        "wins": 1,
-        "losses": 1,
-        "gamesWon": 8,
-        "gamesLost": 9,
-        "gamesDiff": -1,
-        "points": 10
-      },
-      {
         "id": 5,
         "name": "Sergio",
         "group_number": 2,
-        "matchesPlayed": 2,
-        "wins": 0,
+        "matchesPlayed": 3,
+        "wins": 1,
         "losses": 2,
-        "gamesWon": 3,
-        "gamesLost": 12,
-        "gamesDiff": -9,
-        "points": 3
+        "gamesWon": 9,
+        "gamesLost": 15,
+        "gamesDiff": -6,
+        "points": 11
       }
     ],
     "3": [
@@ -620,7 +637,8 @@
         {
           "type": "conditional_first",
           "player": "Raul",
-          "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+          "text": "Si Raul gana a Pablo, Raul es primero. Si Raul pierde 7-6, Raul sigue siendo primero.",
+          "styled": true
         },
         {
           "type": "conditional_safe",
@@ -640,22 +658,14 @@
           "type": "confirmed_first",
           "player": "Mario",
           "text": "Mario está matemáticamente clasificado como primero de grupo."
-        }
-      ],
-      "predictions": [
-        {
-          "type": "conditional_safe",
-          "player": "Sergio",
-          "text": "Si Sergio le gana a Jorge 6-1 o con más diferencia, entonces Sergio no queda último.",
-          "styled": true
         },
         {
-          "type": "conditional_last",
-          "player": "Jorge",
-          "text": "Si Sergio le gana a Jorge 6-1 o con más diferencia, entonces Jorge queda último.",
-          "styled": true
+          "type": "confirmed_last",
+          "player": "Sergio",
+          "text": "Sergio no puede evitar terminar último de grupo."
         }
-      ]
+      ],
+      "predictions": []
     },
     "3": {
       "confirmed": [
@@ -674,7 +684,7 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Si Carlos DM le gana a Chus por 6-2 o más Y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+          "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM le gana a Jacobo, entonces Chus pierde el primer puesto.",
           "styled": true
         }
       ]
@@ -685,7 +695,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "bbdae394",
+    "hash": "8bb104ba",
     "version": 8,
     "highlights": {
       "1": {
@@ -699,7 +709,8 @@
           {
             "type": "conditional_first",
             "player": "Raul",
-            "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+            "text": "Si Raul gana a Pablo, Raul es primero. Si Raul pierde 7-6, Raul sigue siendo primero.",
+            "styled": true
           },
           {
             "type": "conditional_safe",
@@ -719,22 +730,14 @@
             "type": "confirmed_first",
             "player": "Mario",
             "text": "Mario está matemáticamente clasificado como primero de grupo."
-          }
-        ],
-        "predictions": [
-          {
-            "type": "conditional_safe",
-            "player": "Sergio",
-            "text": "Si Sergio le gana a Jorge 6-1 o con más diferencia, entonces Sergio no queda último.",
-            "styled": true
           },
           {
-            "type": "conditional_last",
-            "player": "Jorge",
-            "text": "Si Sergio le gana a Jorge 6-1 o con más diferencia, entonces Jorge queda último.",
-            "styled": true
+            "type": "confirmed_last",
+            "player": "Sergio",
+            "text": "Sergio no puede evitar terminar último de grupo."
           }
-        ]
+        ],
+        "predictions": []
       },
       "3": {
         "confirmed": [
@@ -753,7 +756,7 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Si Carlos DM le gana a Chus por 6-2 o más Y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+            "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM le gana a Jacobo, entonces Chus pierde el primer puesto.",
             "styled": true
           }
         ]
@@ -764,5 +767,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T13:59:19.933Z"
+  "updatedAt": "2026-07-30T14:04:21.576Z"
 }
