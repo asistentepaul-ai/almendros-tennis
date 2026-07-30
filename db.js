@@ -141,11 +141,33 @@ function getStandings() {
       };
     });
 
-    standings.sort((a, b) => b.points - a.points || b.gamesDiff - a.gamesDiff || b.gamesWon - a.gamesWon);
+    // Desempate: puntos → dif. juegos → juegos ganados → cara a cara (head-to-head)
+    const h2hWinner = (idA, idB) => {
+      const m = data.matches.find(x =>
+        (x.player1_id === idA && x.player2_id === idB) ||
+        (x.player1_id === idB && x.player2_id === idA)
+      );
+      return m ? m.winner_id : null;
+    };
+    standings.sort((a, b) => {
+      const base = b.points - a.points || b.gamesDiff - a.gamesDiff || b.gamesWon - a.gamesWon;
+      if (base !== 0) return base;
+      const w = h2hWinner(a.id, b.id);
+      if (w === a.id) return -1;
+      if (w === b.id) return 1;
+      return 0;
+    });
     result[g] = standings;
   }
 
   return result;
 }
 
-module.exports = { getAllPlayers, findPlayer, findPlayerExact, matchExists, addMatch, deleteMatch, getRecentMatches, getStandings };
+function clearMatches() {
+  const data = load();
+  data.matches = [];
+  data.nextMatchId = 1;
+  save(data);
+}
+
+module.exports = { getAllPlayers, findPlayer, findPlayerExact, matchExists, addMatch, deleteMatch, clearMatches, getRecentMatches, getStandings };

@@ -8,7 +8,7 @@
 try { require('dotenv').config(); } catch (_) {}
 const crypto = require('crypto');
 
-const HIGHLIGHTS_VERSION = 7; // bump: redacción llana con condiciones completas (incluye derrotas y 'salvo que')
+const HIGHLIGHTS_VERSION = 8; // bump: desempate head-to-head (igual que la clasificación real)
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
 const MAX_REMAINING_TO_ENUMERATE = 5; // 14^5 ≈ 540k escenarios, <2s
@@ -51,7 +51,7 @@ function getRemainingPairs(players, groupMatches) {
   return pairs;
 }
 
-function simulateFinalStandings(currentStandings, matchOutcomes) {
+function simulateFinalStandings(currentStandings, matchOutcomes, baseH2H) {
   const final = currentStandings.map(p => ({
     id: p.id, name: p.name,
     points: p.points, wins: p.wins, losses: p.losses,
@@ -66,11 +66,26 @@ function simulateFinalStandings(currentStandings, matchOutcomes) {
     l.points += o.lGames;     l.gamesWon += o.lGames; l.gamesLost += o.wGames; l.losses++;
   }
 
-  final.sort((a, b) =>
-    b.points - a.points ||
-    (b.gamesWon - b.gamesLost) - (a.gamesWon - a.gamesLost) ||
-    b.gamesWon - a.gamesWon
-  );
+  // Cara a cara: partidos jugados (baseH2H) + los simulados en este escenario
+  const h2hWinner = (idA, idB) => {
+    for (const o of matchOutcomes) {
+      if ((o.winnerId === idA && o.loserId === idB) || (o.winnerId === idB && o.loserId === idA)) {
+        return o.winnerId;
+      }
+    }
+    return (baseH2H && baseH2H[`${Math.min(idA, idB)}_${Math.max(idA, idB)}`]) || null;
+  };
+
+  final.sort((a, b) => {
+    const base = b.points - a.points ||
+      (b.gamesWon - b.gamesLost) - (a.gamesWon - a.gamesLost) ||
+      b.gamesWon - a.gamesWon;
+    if (base !== 0) return base;
+    const w = h2hWinner(a.id, b.id);
+    if (w === a.id) return -1;
+    if (w === b.id) return 1;
+    return 0;
+  });
   return final;
 }
 
@@ -176,9 +191,10 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
   for (const X of standings) {
     if (X.id === leader.id || firstCount[X.id] === 0) continue;
     const S = subset(f => f[0].id === X.id);
+    const cond = describe(S).replace(new RegExp(`^${X.name} gana a `), 'gana a ');
     predictions.push({
       type: 'conditional_first', player: X.name,
-      text: `${X.name} gana el grupo si ${describe(S)}.`,
+      text: `${X.name} gana el grupo si ${cond}.`,
     });
   }
 
@@ -203,9 +219,10 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
     if (O.id === last.id || lastCount[O.id] === 0 || lastCount[O.id] === TOTAL) continue;
     const S_O = subset(f => f[n - 1].id === O.id);
     if (S_O.length >= TOTAL - 3) {
+      const excep = describe(complement(S_O)).replace(/\bgana a\b/g, 'gane a').replace(/ o si /g, ' o que ');
       predictions.push({
         type: 'conditional_last', player: O.name,
-        text: `${O.name} acabará último salvo que ${describe(complement(S_O))}.`,
+        text: `${O.name} acabará último salvo que ${excep}.`,
       });
     } else {
       predictions.push({
@@ -421,15 +438,23 @@ function validateStyled(styled, source, groupNames) {
   return true;
 }
 
+// Frases con lógica de excepción/negación: la IA puede invertir el sentido
+// (verificado en pruebas) y la validación léxica no lo detecta → no se estilizan.
+function hasExceptionLogic(text) {
+  return /salvo|excepto|solo |sólo |únicamente|cualquier otro| no /i.test(text);
+}
+
 async function styleWithAI(groupNum, items, groupNames) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey || process.env.TABLON_AI === '0' || items.length === 0) return items;
+  const eligible = items.map((it, idx) => ({ it, idx })).filter(x => !hasExceptionLogic(x.it.text));
+  if (eligible.length === 0) return items;
 
   const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
   const prompt = `Reescribe estas frases de un tablón de torneo de tenis entre amigos para que las entienda cualquiera a la primera. Lenguaje llano y directo, estructura "si pasa X, entonces Y".
 REGLAS ESTRICTAS: conserva exactamente los mismos jugadores, los mismos marcadores (ej. 6-0, 7-5) y las mismas condiciones lógicas COMPLETAS (si la original cubre victoria y derrota, la tuya también). Nada de probabilidades, números nuevos ni jugadores nuevos. Una frase por entrada, máximo 200 caracteres.
 
-${items.map((it, i) => `${i}: ${it.text}`).join('\n')}
+${eligible.map((x, i) => `${i}: ${x.it.text}`).join('\n')}
 
 Responde SOLO con JSON: {"items":[{"i":0,"text":"..."}]}`;
 
@@ -454,12 +479,15 @@ Responde SOLO con JSON: {"items":[{"i":0,"text":"..."}]}`;
     content = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
     const parsed = JSON.parse(content);
     const styledMap = new Map((parsed.items || []).map(x => [x.i, x.text]));
-    return items.map((it, i) => {
+    const out = [...items];
+    eligible.forEach((x, i) => {
       const styled = styledMap.get(i);
-      return styled && validateStyled(styled, it.text, groupNames)
-        ? { ...it, text: styled, styled: true }
-        : it;
+      if (styled && !hasExceptionLogic(styled) === false) { /* styled puede introducir negaciones: revalidar abajo */ }
+      if (styled && validateStyled(styled, x.it.text, groupNames)) {
+        out[x.idx] = { ...x.it, text: styled, styled: true };
+      }
     });
+    return out;
   } catch (e) {
     console.error(`styleWithAI error (grupo ${groupNum}):`, e.message);
     return items;
@@ -536,7 +564,11 @@ async function computeHighlights(allStandings, allMatches, cached) {
     // Hipótesis por enumeración exhaustiva
     if (remainingPairs.length > 0 && remainingPairs.length <= MAX_REMAINING_TO_ENUMERATE) {
       const allOutcomes = enumerateAllOutcomes(remainingPairs);
-      const finals = allOutcomes.map(o => simulateFinalStandings(standings, o));
+      const baseH2H = {};
+      for (const m of groupMatches) {
+        baseH2H[`${Math.min(m.player1_id, m.player2_id)}_${Math.max(m.player1_id, m.player2_id)}`] = m.winner_id;
+      }
+      const finals = allOutcomes.map(o => simulateFinalStandings(standings, o, baseH2H));
       const total = allOutcomes.length;
 
       let result;

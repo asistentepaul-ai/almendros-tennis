@@ -643,7 +643,7 @@
         </tr>
       </tbody>
     </table>
-    <div class="scoring-tiebreak">Desempate (mismos puntos): diferencia de juegos &rsaquo; juegos ganados totales</div>
+    <div class="scoring-tiebreak">Desempate (mismos puntos): diferencia de juegos &rsaquo; juegos ganados totales &rsaquo; cara a cara (gana quien ganó el partido entre ambos)</div>
   </div>
 
   <div class="section-header">
@@ -802,8 +802,8 @@
         <span>${item.text}</span>
       </div>`).join('');
 
-    const divider = confirmed.length > 0 && predictions.length > 0
-      ? `<hr class="tablon-divider"><span class="tablon-section-label">Escenarios posibles</span>`
+    const divider = predictions.length > 0
+      ? `${confirmed.length > 0 ? '<hr class="tablon-divider">' : ''}<span class="tablon-section-label">Escenarios posibles</span>`
       : '';
 
     div.innerHTML = `<div class="tablon-header">Tablón</div>${confirmedRows}${divider}${predRows}`;
