@@ -102,9 +102,14 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
     if (escapesWhenWins.length > 0 && escapesWhenWins.length < TENNIS_SCORES.length) {
       const minDiff = Math.min(...escapesWhenWins.map(o => o.wGames - o.lGames));
       const threshold = escapesWhenWins.find(o => o.wGames - o.lGames === minDiff);
+      const maxPossibleDiff = 6; // 6-0 es el máximo en un set
+      const isMaxScore = threshold.wGames - threshold.lGames === maxPossibleDiff;
+      const saveText = isMaxScore
+        ? `${currentLast.name} solo se salva ganando 6-0 a ${opponent.name}.`
+        : `${currentLast.name} termina último salvo que gane a ${opponent.name} por ${threshold.wGames}-${threshold.lGames} o más.`;
       insights.push({
         type: 'conditional_safe', player: currentLast.name,
-        text: `${currentLast.name} termina último salvo que gane a ${opponent.name} por ${threshold.wGames}-${threshold.lGames} o más.`,
+        text: saveText,
       });
     } else if (escapesWhenWins.length === TENNIS_SCORES.length) {
       insights.push({
@@ -131,9 +136,14 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
   if (secondTakesFirst.length > 0 && secondTakesFirst.length < TENNIS_SCORES.length) {
     const minDiff = Math.min(...secondTakesFirst.map(o => o.wGames - o.lGames));
     const threshold = secondTakesFirst.find(o => o.wGames - o.lGames === minDiff);
+    const maxPossibleDiff = 6;
+    const isMaxScore = threshold.wGames - threshold.lGames === maxPossibleDiff;
+    const firstText = isMaxScore
+      ? `${currentFirst.name} pierde el primer puesto solo si ${currentSecond.name} gana 6-0 a ${opponent2.name}.`
+      : `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name} por ${threshold.wGames}-${threshold.lGames} o más.`;
     insights.push({
       type: 'conditional_first', player: currentFirst.name,
-      text: `${currentFirst.name} pierde el primer puesto si ${currentSecond.name} gana a ${opponent2.name} por ${threshold.wGames}-${threshold.lGames} o más.`,
+      text: firstText,
     });
   } else if (secondTakesFirst.length === TENNIS_SCORES.length) {
     insights.push({
