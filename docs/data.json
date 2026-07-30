@@ -507,37 +507,8 @@
     ]
   },
   "highlights": {
-    "1": [
-      {
-        "type": "confirmed_first",
-        "player": "Raul",
-        "text": "Raul está matemáticamente clasificado como primero de grupo."
-      },
-      {
-        "type": "confirmed_last",
-        "player": "Pepe",
-        "text": "Pepe no puede evitar terminar último de grupo."
-      },
-      {
-        "type": "safe",
-        "player": "Pablo",
-        "text": "Pablo ya no puede terminar último de grupo."
-      }
-    ],
-    "2": [
-      {
-        "type": "confirmed_first",
-        "player": "Mario",
-        "text": "Mario está matemáticamente clasificado como primero de grupo."
-      }
-    ],
-    "3": [],
-    "4": []
-  },
-  "highlightsCache": {
-    "hash": "9446946e",
-    "highlights": {
-      "1": [
+    "1": {
+      "confirmed": [
         {
           "type": "confirmed_first",
           "player": "Raul",
@@ -547,23 +518,79 @@
           "type": "confirmed_last",
           "player": "Pepe",
           "text": "Pepe no puede evitar terminar último de grupo."
-        },
-        {
-          "type": "safe",
-          "player": "Pablo",
-          "text": "Pablo ya no puede terminar último de grupo."
         }
       ],
-      "2": [
+      "predictions": []
+    },
+    "2": {
+      "confirmed": [
         {
           "type": "confirmed_first",
           "player": "Mario",
           "text": "Mario está matemáticamente clasificado como primero de grupo."
         }
       ],
-      "3": [],
-      "4": []
+      "predictions": [
+        {
+          "type": "conditional_safe",
+          "player": "Sergio",
+          "text": "Sergio solo se salva ganando 6-0 a Jorge."
+        }
+      ]
+    },
+    "3": {
+      "confirmed": [],
+      "predictions": []
+    },
+    "4": {
+      "confirmed": [],
+      "predictions": []
     }
   },
-  "updatedAt": "2026-07-30T12:14:02.749Z"
+  "highlightsCache": {
+    "hash": "9446946e",
+    "version": 3,
+    "highlights": {
+      "1": {
+        "confirmed": [
+          {
+            "type": "confirmed_first",
+            "player": "Raul",
+            "text": "Raul está matemáticamente clasificado como primero de grupo."
+          },
+          {
+            "type": "confirmed_last",
+            "player": "Pepe",
+            "text": "Pepe no puede evitar terminar último de grupo."
+          }
+        ],
+        "predictions": []
+      },
+      "2": {
+        "confirmed": [
+          {
+            "type": "confirmed_first",
+            "player": "Mario",
+            "text": "Mario está matemáticamente clasificado como primero de grupo."
+          }
+        ],
+        "predictions": [
+          {
+            "type": "conditional_safe",
+            "player": "Sergio",
+            "text": "Sergio solo se salva ganando 6-0 a Jorge."
+          }
+        ]
+      },
+      "3": {
+        "confirmed": [],
+        "predictions": []
+      },
+      "4": {
+        "confirmed": [],
+        "predictions": []
+      }
+    }
+  },
+  "updatedAt": "2026-07-30T12:20:42.170Z"
 }
