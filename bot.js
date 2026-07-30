@@ -6,6 +6,8 @@ const { findPlayer, findPlayerExact, addMatch, deleteMatch, clearMatches, matchE
 
 // Pending overwrite requests: chatId -> { matchId, newMatchData, p1, p2, parsed }
 const pendingOverwrites = new Map();
+// Pending delete requests: chatId -> { matchId, p1, p2 }
+const pendingDeletes = new Map();
 // Pending reinicio confirmations: Set of chatIds
 const pendingReinicio = new Set();
 
@@ -65,9 +67,48 @@ function formatExistingMatch(match) {
   return `🏆 *${winner.name}* ganó a *${loser.name}* · ${score}${tb} · [${date}]`;
 }
 
+function looksLikeDeleteRequest(text) {
+  return /\b(borra|borrar|borre|elimina|eliminar|elimine|quita|quitar|quite|cancela|cancelar)\b/i.test(text);
+}
+
+async function handleDeleteRequest(chatId, text) {
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const t = norm(text);
+  const players = getAllPlayers();
+
+  const found = players
+    .map(p => ({ ...p, pos: t.indexOf(norm(p.name)) }))
+    .filter(p => p.pos !== -1)
+    .sort((a, b) => a.pos - b.pos);
+
+  if (found.length < 2) {
+    return bot.sendMessage(chatId,
+      '❓ No encontré dos jugadores en ese mensaje.\n\nPrueba: "borra el resultado de Raúl y Pablo"'
+    );
+  }
+
+  const p1 = found[0];
+  const p2 = found[1];
+  const match = matchExists(p1.id, p2.id);
+
+  if (!match) {
+    return bot.sendMessage(chatId,
+      `❌ No hay ningún resultado registrado entre *${p1.name}* y *${p2.name}*.`,
+      { parse_mode: 'Markdown' }
+    );
+  }
+
+  pendingDeletes.set(chatId, { matchId: match.id, p1, p2 });
+  bot.sendMessage(chatId,
+    `🗑️ ¿Borrar este resultado?\n\n${formatExistingMatch(match)}\n\nResponde /si para confirmar o /no para cancelar.`,
+    { parse_mode: 'Markdown' }
+  );
+}
+
 async function handleResult(chatId, text, senderName) {
-  // Clear any pending overwrite when a new result comes in
+  // Clear any pending overwrite/delete when a new result comes in
   pendingOverwrites.delete(chatId);
+  pendingDeletes.delete(chatId);
 
   const thinking = await bot.sendMessage(chatId, '⏳ Interpretando resultado...');
   const parsed = await parseMatchResult(text);
@@ -156,6 +197,16 @@ bot.onText(/\/confirmar/, (msg) => {
 });
 
 bot.onText(/\/si/, (msg) => {
+  const pendingDel = pendingDeletes.get(msg.chat.id);
+  if (pendingDel) {
+    pendingDeletes.delete(msg.chat.id);
+    deleteMatch(pendingDel.matchId);
+    triggerSync();
+    return bot.sendMessage(msg.chat.id,
+      `✅ Resultado borrado: *${pendingDel.p1.name}* vs *${pendingDel.p2.name}*.`,
+      { parse_mode: 'Markdown' }
+    );
+  }
   const pending = pendingOverwrites.get(msg.chat.id);
   if (!pending) return;
   pendingOverwrites.delete(msg.chat.id);
@@ -167,6 +218,10 @@ bot.onText(/\/no/, (msg) => {
   if (pendingReinicio.has(msg.chat.id)) {
     pendingReinicio.delete(msg.chat.id);
     return bot.sendMessage(msg.chat.id, '↩️ Reinicio cancelado. Los datos se mantienen intactos.');
+  }
+  if (pendingDeletes.has(msg.chat.id)) {
+    pendingDeletes.delete(msg.chat.id);
+    return bot.sendMessage(msg.chat.id, '↩️ Cancelado. El resultado se mantiene.');
   }
   if (pendingOverwrites.has(msg.chat.id)) {
     pendingOverwrites.delete(msg.chat.id);
@@ -194,7 +249,10 @@ bot.onText(/\/ayuda/, (msg) => {
     `*Comandos:*\n` +
     `/clasificacion — Ver clasificación actual\n` +
     `/partidos — Últimos partidos\n` +
-    `/ayuda — Este mensaje`,
+    `/ayuda — Este mensaje\n\n` +
+    `*Para borrar un resultado:*\n` +
+    `• "borra el resultado de Raúl y Pablo"\n` +
+    `• "elimina el partido de Chus y JJ"`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -202,6 +260,11 @@ bot.onText(/\/ayuda/, (msg) => {
 bot.on('message', async (msg) => {
   if (!msg.text) return;
   if (msg.text.startsWith('/')) return;
+
+  if (looksLikeDeleteRequest(msg.text)) {
+    await handleDeleteRequest(msg.chat.id, msg.text);
+    return;
+  }
 
   // In group chats, only react if the message looks like a tennis result
   const looksLikeResult = /(\d)\s*[-–]\s*(\d)|ganó|gano|perdió|perdio|resultado/i.test(msg.text);
