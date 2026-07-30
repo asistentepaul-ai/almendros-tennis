@@ -148,29 +148,29 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
 async function getAIMultiMatchPredictions(groupNum, standings, firstCount, lastCount, total, remainingPairs, apiKey) {
   const n = standings.length;
 
-  const firstPct = standings
-    .map(p => ({ name: p.name, pct: Math.round(firstCount[p.id] / total * 100) }))
-    .filter(p => p.pct > 5).sort((a, b) => b.pct - a.pct);
+  // Only call AI if the situation is genuinely competitive (leader/last could change)
+  const leader = standings[0];
+  const last = standings[n - 1];
+  const leaderDominates = firstCount[leader.id] / total > 0.95;
+  const lastDominates = lastCount[last.id] / total > 0.95;
+  if (leaderDominates && lastDominates) return [];
 
-  const lastPct = standings
-    .map(p => ({ name: p.name, pct: Math.round(lastCount[p.id] / total * 100) }))
-    .filter(p => p.pct > 5).sort((a, b) => b.pct - a.pct);
-
-  if (firstPct.length === 0 && lastPct.length === 0) return [];
-
-  const standingsText = standings.map((p, i) => `${i+1}. ${p.name}: ${p.points} pts`).join('\n');
+  const standingsText = standings.map((p, i) =>
+    `${i+1}. ${p.name}: ${p.points} pts (${p.wins}V ${p.losses}D, dif. juegos: ${p.gamesDiff >= 0 ? '+' : ''}${p.gamesDiff})`
+  ).join('\n');
   const matchesText = remainingPairs.map(([p1, p2]) => `${p1.name} vs ${p2.name}`).join(', ');
-  const firstText = firstPct.map(p => `${p.name} ${p.pct}%`).join(', ');
-  const lastText = lastPct.map(p => `${p.name} ${p.pct}%`).join(', ');
 
   const prompt = `Genera máximo 2 frases cortas y asépticas en español para un tablón de torneo de tenis.
+Sistema de puntos: juegos ganados + 2 bonus por victoria. Desempate: diferencia de juegos, luego juegos ganados.
 
-Grupo ${groupNum}. Clasificación: ${standingsText}
+Grupo ${groupNum}. Clasificación actual:
+${standingsText}
 Partidos pendientes: ${matchesText}
-Probabilidad de terminar primero: ${firstText}
-Probabilidad de terminar último: ${lastText}
 
-Una frase sobre el primero (si aplica), una sobre el último (si aplica). Tono neutro. Sin dramatismo.
+Genera frases que hagan referencia a resultados concretos de partidos, no a porcentajes ni probabilidades.
+Ejemplo válido: "X pierde el primero si Y gana a Z y además lo hace por más de 6-3."
+Ejemplo válido: "A se salva si gana a B o si C pierde su partido."
+Una frase sobre el primero (si la situación es ajustada), una sobre el último (si aplica). Tono neutro.
 Formato: {"highlights": [{"type": "conditional_first"|"conditional_safe", "player": "nombre", "text": "frase"}]}`;
 
   try {
