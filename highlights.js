@@ -8,7 +8,7 @@
 try { require('dotenv').config(); } catch (_) {}
 const crypto = require('crypto');
 
-const HIGHLIGHTS_VERSION = 6; // bump: hipótesis integrales (ganar grupo, caer último) + estilista IA validado
+const HIGHLIGHTS_VERSION = 7; // bump: redacción llana con condiciones completas (incluye derrotas y 'salvo que')
 const MAX_WIN_PTS = 9;
 const TENNIS_SCORES = [[6,0],[6,1],[6,2],[6,3],[6,4],[7,5],[7,6]];
 const MAX_REMAINING_TO_ENUMERATE = 5; // 14^5 ≈ 540k escenarios, <2s
@@ -132,110 +132,109 @@ function analyze1MatchPredictions(standings, pair, finals, outcomes) {
   const last = standings[n - 1];
   const confirmed = [];
   const predictions = [];
+  const TOTAL = outcomes.length; // 14 desenlaces posibles
 
-  // Marcadores (perspectiva del ganador `winnerId`) que cumplen `pred`
-  const scoresWhere = (winnerId, pred) => {
-    const qual = [];
-    for (let i = 0; i < outcomes.length; i++) {
-      const o = outcomes[i][0];
-      if (o.winnerId === winnerId && pred(finals[i])) qual.push([o.wGames, o.lGames]);
-    }
-    return qual;
+  // Subconjunto de desenlaces (victorias de cualquiera de los dos) que cumplen `pred`
+  const subset = pred => {
+    const S = [];
+    for (let i = 0; i < outcomes.length; i++) if (pred(finals[i])) S.push(outcomes[i][0]);
+    return S;
   };
+  const sideScores = (S, playerId) =>
+    S.filter(o => o.winnerId === playerId).map(o => [o.wGames, o.lGames]);
+  // Describe un subconjunto como condición legible, cubriendo ambos lados del partido
+  const describe = S => {
+    const a = sideScores(S, pA.id), b = sideScores(S, pB.id);
+    const parts = [];
+    if (a.length) parts.push(`${pA.name} gana a ${pB.name}${condSuffix(a)}`);
+    if (b.length) parts.push(`${pB.name} gana a ${pA.name}${condSuffix(b)}`);
+    return parts.join(' o si ');
+  };
+  const complement = S =>
+    outcomes.map(o => o[0]).filter(o =>
+      !S.some(s => s.winnerId === o.winnerId && s.wGames === o.wGames && s.lGames === o.lGames));
 
   // Certezas por enumeración (más finas que la cota de puntos)
   const firstCount = {}, lastCount = {};
   for (const p of standings) { firstCount[p.id] = 0; lastCount[p.id] = 0; }
   for (const f of finals) { firstCount[f[0].id]++; lastCount[f[n - 1].id]++; }
-  const total = finals.length;
 
-  if (firstCount[leader.id] === total) {
+  if (firstCount[leader.id] === TOTAL) {
     confirmed.push({
       type: 'confirmed_first', player: leader.name,
       text: `${leader.name} terminará primero de grupo, pase lo que pase en el partido pendiente.`,
     });
   }
-  if (lastCount[last.id] === total) {
+  if (lastCount[last.id] === TOTAL) {
     confirmed.push({
       type: 'confirmed_last', player: last.name,
       text: `${last.name} terminará último de grupo, pase lo que pase en el partido pendiente.`,
     });
   }
 
-  // 1) ¿Alguien de los que juegan puede GANAR EL GRUPO?
-  for (const X of [pA, pB]) {
-    if (X.id === leader.id) continue;
-    const opp = X.id === pA.id ? pB : pA;
-    const qFirst = scoresWhere(X.id, f => f[0].id === X.id);
-    if (qFirst.length === 0) continue;
-
-    if (X.id === last.id) {
-      const qEscape = scoresWhere(X.id, f => f[n - 1].id !== X.id);
-      const sufF = condSuffix(qFirst);
-      if (qEscape.length === TENNIS_SCORES.length && qFirst.length === TENNIS_SCORES.length) {
-        predictions.push({
-          type: 'conditional_first', player: X.name,
-          text: `${X.name}, ahora último, no solo se salvaría: gana el grupo si vence a ${opp.name}, con cualquier marcador.`,
-        });
-      } else if (qEscape.length === TENNIS_SCORES.length) {
-        predictions.push({
-          type: 'conditional_first', player: X.name,
-          text: `${X.name}, ahora último, se salva con cualquier victoria sobre ${opp.name} — y si gana${sufF}, se lleva el grupo.`,
-        });
-      } else {
-        predictions.push({
-          type: 'conditional_first', player: X.name,
-          text: `${X.name} se salva del último puesto si gana a ${opp.name}${condSuffix(qEscape)}, y ganando${sufF} sería además primero.`,
-        });
-      }
-    } else {
-      predictions.push({
-        type: 'conditional_first', player: X.name,
-        text: `${X.name} gana el grupo si vence a ${opp.name}${condSuffix(qFirst)}.`,
-      });
-    }
+  // 1) ¿Quién puede GANAR EL GRUPO (aparte del líder actual)?
+  for (const X of standings) {
+    if (X.id === leader.id || firstCount[X.id] === 0) continue;
+    const S = subset(f => f[0].id === X.id);
+    predictions.push({
+      type: 'conditional_first', player: X.name,
+      text: `${X.name} gana el grupo si ${describe(S)}.`,
+    });
   }
 
-  // 2) Escape del último cuando NO tiene opción de ganar el grupo
-  if ((pA.id === last.id || pB.id === last.id) && firstCount[last.id] === 0) {
-    const opp = pA.id === last.id ? pB : pA;
-    const qEscape = scoresWhere(last.id, f => f[n - 1].id !== last.id);
-    if (qEscape.length > 0) {
+  // 2) El último actual: ¿cuándo se salva? (condición completa: victorias Y derrotas)
+  if (lastCount[last.id] > 0 && lastCount[last.id] < TOTAL) {
+    const S_last = subset(f => f[n - 1].id === last.id);
+    if (S_last.length <= 3) {
       predictions.push({
         type: 'conditional_safe', player: last.name,
-        text: `${last.name} se salva del último puesto si gana a ${opp.name}${condSuffix(qEscape)}.`,
+        text: `${last.name} solo acaba último si ${describe(S_last)}; con cualquier otro resultado se salva.`,
+      });
+    } else {
+      predictions.push({
+        type: 'conditional_safe', player: last.name,
+        text: `${last.name} se salva del último puesto si ${describe(complement(S_last))}.`,
       });
     }
   }
 
-  // 3) ¿Alguien que NO es último puede CAER a último?
+  // 3) ¿Quién puede CAER al último puesto sin serlo ahora?
   for (const O of standings) {
-    if (O.id === last.id || lastCount[O.id] === 0 || lastCount[O.id] === total) continue;
-    // Desenlaces en que O acaba último, partidos por ganador del partido pendiente
-    const porGanador = [];
-    for (const W of [pA, pB]) {
-      const qual = scoresWhere(W.id, f => f[n - 1].id === O.id);
-      if (qual.length > 0) porGanador.push({ W, qual });
+    if (O.id === last.id || lastCount[O.id] === 0 || lastCount[O.id] === TOTAL) continue;
+    const S_O = subset(f => f[n - 1].id === O.id);
+    if (S_O.length >= TOTAL - 3) {
+      predictions.push({
+        type: 'conditional_last', player: O.name,
+        text: `${O.name} acabará último salvo que ${describe(complement(S_O))}.`,
+      });
+    } else {
+      predictions.push({
+        type: 'conditional_last', player: O.name,
+        text: `${O.name} caería al último puesto si ${describe(S_O)}.`,
+      });
     }
-    if (porGanador.length === 0) continue;
-    const trozos = porGanador.map(({ W, qual }) => {
-      const L = W.id === pA.id ? pB : pA;
-      return `${W.name} gana a ${L.name}${condSuffix(qual)}`;
-    });
-    predictions.push({
-      type: 'conditional_last', player: O.name,
-      text: `${O.name} caería al último puesto si ${trozos.join(' o si ')}.`,
-    });
   }
 
-  // 4) El líder actual: ¿mantiene el liderato incluso perdiendo?
-  if ((pA.id === leader.id || pB.id === leader.id) && firstCount[leader.id] < total) {
+  // 4) El líder actual, si juega: condición completa de retención
+  if ((pA.id === leader.id || pB.id === leader.id) && firstCount[leader.id] < TOTAL) {
     const opp = pA.id === leader.id ? pB : pA;
-    const qLoseSafe = scoresWhere(opp.id, f => f[0].id === leader.id); // el rival gana pero el líder sigue 1º
-    if (qLoseSafe.length > 0) {
+    const S_keep = subset(f => f[0].id === leader.id);
+    const winKeep = sideScores(S_keep, leader.id);
+    const loseKeep = sideScores(S_keep, opp.id); // el rival gana pero el líder sigue 1º
+    if (winKeep.length === TENNIS_SCORES.length && loseKeep.length > 0) {
       predictions.push({
         type: 'conditional_first', player: leader.name,
-        text: `${leader.name} seguiría primero incluso si ${opp.name} le gana${condSuffix(qLoseSafe)}.`,
+        text: `${leader.name} será primero si gana a ${opp.name} — e incluso si pierde${condSuffix(loseKeep).replace(' exactamente', '')}, seguiría primero.`,
+      });
+    } else if (winKeep.length === TENNIS_SCORES.length) {
+      predictions.push({
+        type: 'conditional_first', player: leader.name,
+        text: `${leader.name} será primero si gana a ${opp.name}; si pierde, el primer puesto se decide por el marcador.`,
+      });
+    } else {
+      predictions.push({
+        type: 'conditional_first', player: leader.name,
+        text: `${leader.name} conserva el primer puesto si ${describe(S_keep)}.`,
       });
     }
   }
@@ -427,8 +426,8 @@ async function styleWithAI(groupNum, items, groupNames) {
   if (!apiKey || process.env.TABLON_AI === '0' || items.length === 0) return items;
 
   const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
-  const prompt = `Reescribe estas frases de un tablón de torneo de tenis entre amigos para que suenen naturales en español, tono neutro de crónica deportiva.
-REGLAS ESTRICTAS: conserva exactamente los mismos jugadores, los mismos marcadores (ej. 6-0, 7-5) y las mismas condiciones lógicas. No añadas probabilidades, números ni jugadores. Una frase por entrada, máximo 200 caracteres.
+  const prompt = `Reescribe estas frases de un tablón de torneo de tenis entre amigos para que las entienda cualquiera a la primera. Lenguaje llano y directo, estructura "si pasa X, entonces Y".
+REGLAS ESTRICTAS: conserva exactamente los mismos jugadores, los mismos marcadores (ej. 6-0, 7-5) y las mismas condiciones lógicas COMPLETAS (si la original cubre victoria y derrota, la tuya también). Nada de probabilidades, números nuevos ni jugadores nuevos. Una frase por entrada, máximo 200 caracteres.
 
 ${items.map((it, i) => `${i}: ${it.text}`).join('\n')}
 
