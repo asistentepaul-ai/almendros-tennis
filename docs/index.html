@@ -482,6 +482,36 @@
     .legend-badge.loss { background: var(--clay-bg); color: var(--clay); border: 1px solid var(--clay-border); }
     .legend-badge.wo { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
 
+    .tablon {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.85rem 1.2rem;
+      margin-top: 0.75rem; box-shadow: var(--shadow);
+    }
+
+    .tablon-header {
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .tablon-item {
+      display: flex; align-items: flex-start; gap: 0.55rem;
+      font-size: 0.78rem; color: var(--muted2); line-height: 1.4;
+      padding: 0.28rem 0; border-top: 1px solid var(--border);
+    }
+
+    .tablon-item:first-of-type { border-top: none; padding-top: 0; }
+
+    .tablon-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+    }
+
+    .tablon-dot.t-confirmed-first { background: var(--grass); }
+    .tablon-dot.t-confirmed-last  { background: var(--red); }
+    .tablon-dot.t-safe            { background: var(--muted); }
+    .tablon-dot.t-conditional     { background: var(--clay); }
+
     footer {
       text-align: center; padding: 2rem;
       color: var(--muted); font-size: 0.75rem;
@@ -629,6 +659,7 @@
   let allMatches = [];
   let allStandings = {};
   let allPlayers = [];
+  let allHighlights = {};
 
   // Fetch data.json — same origin on GitHub Pages
   async function loadData() {
@@ -638,6 +669,7 @@
       allPlayers = data.players || [];
       allMatches = data.matches || [];
       allStandings = data.standings || {};
+      allHighlights = data.highlights || {};
       lastUpdatedAt = data.updatedAt || null;
       renderAll();
       updateTimestamp();
@@ -721,6 +753,28 @@
         </div>
       `;
     }).join('');
+  }
+
+  const TABLON_DOT = {
+    confirmed_first: 't-confirmed-first',
+    confirmed_last:  't-confirmed-last',
+    safe:            't-safe',
+    conditional_first: 't-conditional',
+    conditional_safe:  't-conditional',
+  };
+
+  function renderTablon(groupNum) {
+    const items = allHighlights[groupNum] || [];
+    if (items.length === 0) return null;
+    const div = document.createElement('div');
+    div.className = 'tablon';
+    const rows = items.map(item => `
+      <div class="tablon-item">
+        <div class="tablon-dot ${TABLON_DOT[item.type] || 't-conditional'}"></div>
+        <span>${item.text}</span>
+      </div>`).join('');
+    div.innerHTML = `<div class="tablon-header">Tablón</div>${rows}`;
+    return div;
   }
 
   function renderGroups() {
@@ -824,6 +878,9 @@
       row.appendChild(standingsCard);
       row.appendChild(h2hCard);
       container.appendChild(row);
+
+      const tablon = renderTablon(g);
+      if (tablon) container.appendChild(tablon);
     }
   }
 

@@ -1,6 +1,5 @@
 #!/bin/bash
 # Sincroniza tennis.json local → data.json público en GitHub Pages
-# + backup a Google Sheet
 # Ejecutado por cron de OpenClaw cada 2 minutos
 
 set -e
@@ -14,19 +13,38 @@ if [ ! -f "$DATA_FILE" ]; then
   exit 0
 fi
 
-# Generar data.json con standings calculados
+# Generar data.json con standings y highlights calculados
 cd "$REPO_DIR"
-node -e "
+node --input-type=module <<'EOF'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const { getStandings, getRecentMatches, getAllPlayers } = require('./db');
+const { computeHighlights } = require('./highlights');
+const fs = require('fs');
+
+const standings = getStandings();
+const matches = getRecentMatches(500);
+
+// Leer cache de highlights anterior (evita llamar a IA si standings no cambiaron)
+let cached = null;
+try {
+  const prev = JSON.parse(fs.readFileSync('docs/data.json', 'utf8'));
+  cached = prev.highlightsCache || null;
+} catch (_) {}
+
+const highlightsResult = await computeHighlights(standings, matches, cached);
+
 const data = {
   players: getAllPlayers(),
-  matches: getRecentMatches(100),
-  standings: getStandings(),
-  updatedAt: new Date().toISOString()
+  matches,
+  standings,
+  highlights: highlightsResult.highlights,
+  highlightsCache: { hash: highlightsResult.hash, highlights: highlightsResult.highlights },
+  updatedAt: new Date().toISOString(),
 };
-require('fs').writeFileSync('docs/data.json', JSON.stringify(data, null, 2));
-console.log('data.json actualizado:', data.matches.length, 'partidos');
-"
+fs.writeFileSync('docs/data.json', JSON.stringify(data, null, 2));
+console.log('data.json actualizado:', matches.length, 'partidos');
+EOF
 
 # Commit y push si hay cambios
 cd "$REPO_DIR"

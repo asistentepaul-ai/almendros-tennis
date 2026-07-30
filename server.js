@@ -1,8 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const { exec } = require('child_process');
 const { getStandings, getRecentMatches, addMatch, deleteMatch, findPlayer, findPlayerExact, matchExists, getAllPlayers } = require('./db');
 const { parseMatchResult } = require('./parser');
+const { computeHighlights } = require('./highlights');
+
+let highlightsCache = null;
+
+function triggerSync() {
+  const script = path.join(__dirname, 'sync-to-github.sh');
+  exec(`bash "${script}"`, (err, stdout, stderr) => {
+    if (err) console.error('Sync error:', stderr || err.message);
+    else console.log('Sync:', stdout.trim());
+  });
+}
 
 const app = express();
 app.use(express.json());
@@ -22,6 +34,19 @@ app.get('/api/matches', (req, res) => {
 
 app.get('/api/players', (req, res) => {
   res.json(getAllPlayers());
+});
+
+app.get('/api/highlights', async (req, res) => {
+  try {
+    const standings = getStandings();
+    const matches = getRecentMatches(500);
+    const result = await computeHighlights(standings, matches, highlightsCache);
+    highlightsCache = result;
+    res.json(result.highlights);
+  } catch (e) {
+    console.error('Highlights error:', e.message);
+    res.json({});
+  }
 });
 
 // Parse natural language and save match
@@ -62,6 +87,7 @@ app.post('/api/parse', async (req, res) => {
   const winner = parsed.player1_games > parsed.player2_games ? p1 : p2;
   const loser = winner.id === p1.id ? p2 : p1;
 
+  triggerSync();
   res.json({
     success: true,
     id,
@@ -85,6 +111,7 @@ app.post('/api/matches', (req, res) => {
   }
 
   const id = addMatch({ player1_id, player2_id, player1_games, player2_games, is_tiebreak, tiebreak_score, added_by });
+  triggerSync();
   res.json({ success: true, id });
 });
 
