@@ -653,7 +653,7 @@
         {
           "type": "conditional_safe",
           "player": "Sergio",
-          "text": "Sergio solo se salva ganando 6-0 a Jorge."
+          "text": "Sergio se salva del último puesto si gana a Jorge exactamente 6-0."
         }
       ]
     },
@@ -674,7 +674,7 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Chus pierde el primer puesto si Carlos DM gana a Chus por 6-2 o más y gana a Jacobo."
+          "text": "Chus pierde el primer puesto si Carlos DM le gana por 6-2 o más y además gana a Jacobo."
         }
       ]
     },
@@ -685,7 +685,7 @@
   },
   "highlightsCache": {
     "hash": "51b5c9e0",
-    "version": 4,
+    "version": 5,
     "highlights": {
       "1": {
         "confirmed": [
@@ -714,7 +714,7 @@
           {
             "type": "conditional_safe",
             "player": "Sergio",
-            "text": "Sergio solo se salva ganando 6-0 a Jorge."
+            "text": "Sergio se salva del último puesto si gana a Jorge exactamente 6-0."
           }
         ]
       },
@@ -735,7 +735,7 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Chus pierde el primer puesto si Carlos DM gana a Chus por 6-2 o más y gana a Jacobo."
+            "text": "Chus pierde el primer puesto si Carlos DM le gana por 6-2 o más y además gana a Jacobo."
           }
         ]
       },
@@ -745,5 +745,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:55:42.847Z"
+  "updatedAt": "2026-07-30T13:15:04.372Z"
 }
