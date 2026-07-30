@@ -435,20 +435,47 @@
 
     .scoring-legend {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 1rem 1.5rem;
+      border-radius: 14px; padding: 1.2rem 1.5rem;
       margin-bottom: 2rem;
-      display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
       box-shadow: var(--shadow);
     }
 
-    .legend-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.78rem; color: var(--muted2); font-weight: 500;
+    .scoring-legend-title {
+      font-size: 0.78rem; font-weight: 700; color: var(--muted2);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 0.9rem;
     }
 
-    .legend-badge {
-      font-size: 0.72rem; font-weight: 800;
-      padding: 2px 8px; border-radius: 5px;
+    .scoring-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .scoring-table th {
+      text-align: center; font-weight: 700; font-size: 0.72rem;
+      color: var(--muted); padding: 0 0.8rem 0.5rem;
+    }
+
+    .scoring-table th:first-child { text-align: left; }
+
+    .scoring-table td {
+      text-align: center; padding: 0.25rem 0.8rem;
+      color: var(--muted2); border-top: 1px solid var(--border);
+    }
+
+    .scoring-table td:first-child { text-align: left; color: var(--text); font-weight: 500; }
+
+    .scoring-table tr.total-row td {
+      font-weight: 800; color: var(--text); border-top: 2px solid var(--border);
+    }
+
+    .scoring-table td.pts-win { color: var(--grass); font-weight: 700; }
+    .scoring-table td.pts-loss { color: var(--muted); }
+    .scoring-table td.pts-total-win { color: var(--grass); }
+    .scoring-table td.pts-total-loss { color: var(--clay); }
+
+    .scoring-tiebreak {
+      margin-top: 0.7rem; font-size: 0.72rem; color: var(--muted);
     }
 
     .legend-badge.win { background: var(--grass-bg); color: var(--grass); border: 1px solid var(--grass-border); }
@@ -547,11 +574,34 @@
   </div>
 
   <div class="scoring-legend">
-    <strong style="font-size:0.82rem;color:var(--muted2);font-weight:700;">Sistema de puntos:</strong>
-    <div class="legend-item"><span class="legend-badge win">+2 pts</span> Bonus victoria</div>
-    <div class="legend-item"><span class="legend-badge loss">+J</span> Juegos ganados (siempre)</div>
-    <div class="legend-item"><span class="legend-badge wo">0</span> Derrota o no presentado (sin bonus)</div>
-    <div class="legend-item" style="margin-left:auto;font-size:0.72rem;color:var(--muted);">Desempate: dif. juegos → juegos ganados</div>
+    <div class="scoring-legend-title">Sistema de puntos</div>
+    <table class="scoring-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Jugador 1 (gana 6-4)</th>
+          <th>Jugador 2 (pierde 4-6)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Juegos ganados</td>
+          <td class="pts-win">+6</td>
+          <td class="pts-loss">+4</td>
+        </tr>
+        <tr>
+          <td>Bonus de victoria</td>
+          <td class="pts-win">+2</td>
+          <td class="pts-loss">—</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total</td>
+          <td class="pts-total-win">8 pts</td>
+          <td class="pts-total-loss">4 pts</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="scoring-tiebreak">Desempate (mismos puntos): diferencia de juegos &rsaquo; juegos ganados totales</div>
   </div>
 
   <div class="section-header">
@@ -696,7 +746,7 @@
         const isFirst = pos === 1;
         const rowClass = isFirst ? 'row-1' : (isLast ? 'row-last' : '');
         const posClass = `pos-${Math.min(pos, 5)}`;
-        const isYou = p.name === 'Pablo';
+        const isYou = false;
         const diff = p.gamesDiff >= 0 ? `+${p.gamesDiff}` : `${p.gamesDiff}`;
         return `
           <tr class="${rowClass}">
