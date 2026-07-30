@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 14,
+      "player1_id": 9,
+      "player2_id": 11,
+      "player1_games": 6,
+      "player2_games": 0,
+      "winner_id": 9,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T12:32:58.379Z",
+      "raw_input": "Chus 6 jj0",
+      "added_by": "Pablo",
+      "player1_name": "Chus",
+      "player2_name": "JJ",
+      "winner_name": "Chus",
+      "group_number": 3
+    },
+    {
       "id": 13,
       "player1_id": 8,
       "player2_id": 6,
@@ -398,13 +415,13 @@
         "id": 9,
         "name": "Chus",
         "group_number": 3,
-        "matchesPlayed": 1,
-        "wins": 1,
+        "matchesPlayed": 2,
+        "wins": 2,
         "losses": 0,
-        "gamesWon": 6,
+        "gamesWon": 12,
         "gamesLost": 3,
-        "gamesDiff": 3,
-        "points": 8
+        "gamesDiff": 9,
+        "points": 16
       },
       {
         "id": 10,
@@ -417,18 +434,6 @@
         "gamesLost": 6,
         "gamesDiff": -3,
         "points": 3
-      },
-      {
-        "id": 11,
-        "name": "JJ",
-        "group_number": 3,
-        "matchesPlayed": 0,
-        "wins": 0,
-        "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
       },
       {
         "id": 12,
@@ -452,6 +457,18 @@
         "gamesWon": 0,
         "gamesLost": 0,
         "gamesDiff": 0,
+        "points": 0
+      },
+      {
+        "id": 11,
+        "name": "JJ",
+        "group_number": 3,
+        "matchesPlayed": 1,
+        "wins": 0,
+        "losses": 1,
+        "gamesWon": 0,
+        "gamesLost": 6,
+        "gamesDiff": -6,
         "points": 0
       }
     ],
@@ -548,7 +565,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "9446946e",
+    "hash": "0a08be6d",
     "version": 3,
     "highlights": {
       "1": {
@@ -592,5 +609,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T12:29:06.918Z"
+  "updatedAt": "2026-07-30T12:32:58.473Z"
 }
