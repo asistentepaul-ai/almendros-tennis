@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 10,
+      "player1_id": 6,
+      "player2_id": 5,
+      "player1_games": 6,
+      "player2_games": 3,
+      "winner_id": 6,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T11:54:37.239Z",
+      "raw_input": "Mario Sergio 6 3",
+      "added_by": "Pablo",
+      "player1_name": "Mario",
+      "player2_name": "Sergio",
+      "winner_name": "Mario",
+      "group_number": 2
+    },
+    {
       "id": 9,
       "player1_id": 9,
       "player2_id": 10,
@@ -280,13 +297,25 @@
         "id": 6,
         "name": "Mario",
         "group_number": 2,
-        "matchesPlayed": 1,
-        "wins": 1,
+        "matchesPlayed": 2,
+        "wins": 2,
         "losses": 0,
-        "gamesWon": 6,
-        "gamesLost": 3,
-        "gamesDiff": 3,
-        "points": 8
+        "gamesWon": 12,
+        "gamesLost": 6,
+        "gamesDiff": 6,
+        "points": 16
+      },
+      {
+        "id": 5,
+        "name": "Sergio",
+        "group_number": 2,
+        "matchesPlayed": 1,
+        "wins": 0,
+        "losses": 1,
+        "gamesWon": 3,
+        "gamesLost": 6,
+        "gamesDiff": -3,
+        "points": 3
       },
       {
         "id": 7,
@@ -299,18 +328,6 @@
         "gamesLost": 6,
         "gamesDiff": -3,
         "points": 3
-      },
-      {
-        "id": 5,
-        "name": "Sergio",
-        "group_number": 2,
-        "matchesPlayed": 0,
-        "wins": 0,
-        "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
       },
       {
         "id": 8,
@@ -461,7 +478,7 @@
     "4": []
   },
   "highlightsCache": {
-    "hash": "249ce501",
+    "hash": "b290039d",
     "highlights": {
       "1": [
         {
@@ -485,5 +502,5 @@
       "4": []
     }
   },
-  "updatedAt": "2026-07-30T11:47:35.222Z"
+  "updatedAt": "2026-07-30T11:54:43.881Z"
 }
