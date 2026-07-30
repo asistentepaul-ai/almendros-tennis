@@ -1,12 +1,6 @@
-const ALL_PLAYERS = [
-  'Pepe', 'Javi', 'Raul', 'Pablo',
-  'Sergio', 'Mario', 'Jorge', 'Alex',
-  'Chus', 'Jacobo', 'JJ', 'Dani', 'Carlos DM',
-  'Carlitos', 'Guille', 'Juan', 'Rober',
-];
-
+// Los jugadores válidos son los de la última ronda (se pasan por parámetro).
 // Regex-based parser — works without any API key
-function regexParse(text) {
+function regexParse(text, ALL_PLAYERS) {
   const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const t = norm(text);
 
@@ -89,7 +83,7 @@ function regexParse(text) {
 }
 
 // AI-enhanced parser via OpenRouter
-async function aiParse(text) {
+async function aiParse(text, ALL_PLAYERS) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
 
@@ -143,14 +137,17 @@ Si no puedes interpretar, responde: null`,
   }
 }
 
-async function parseMatchResult(text) {
+async function parseMatchResult(text, playerNames) {
+  const names = playerNames && playerNames.length
+    ? playerNames
+    : require('./db').getAllPlayers().map(p => p.name);
   // Try AI first if key available, regex as fallback
   if (process.env.OPENROUTER_API_KEY) {
-    const aiResult = await aiParse(text);
+    const aiResult = await aiParse(text, names);
     if (aiResult) return aiResult;
   }
 
-  return regexParse(text);
+  return regexParse(text, names);
 }
 
-module.exports = { parseMatchResult, ALL_PLAYERS };
+module.exports = { parseMatchResult };

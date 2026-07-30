@@ -697,6 +697,17 @@
       .h2h-table thead th { min-width: 40px; white-space: nowrap; }
     }
 
+
+    .round-select {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white; border-radius: 20px;
+      padding: 4px 12px; font-size: 0.75rem; font-weight: 700;
+      font-family: inherit; cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      margin-right: auto;
+    }
+    .round-select option { color: #1C1917; }
   </style>
 </head>
 <body>
@@ -712,6 +723,7 @@
 
 <!-- Sticky top bar -->
 <header>
+  <select id="round-select" class="round-select" title="Cambiar de ronda"></select>
   <span class="refresh-info" id="last-update">Actualizando...</span>
   <div class="live-badge"><div class="live-dot"></div> En vivo</div>
 </header>
@@ -809,20 +821,54 @@
 
   async function loadData() {
     try {
-      const [standingsRes, matchesRes, highlightsRes] = await Promise.all([
-        fetch('/api/standings'),
-        fetch('/api/matches?limit=30'),
-        fetch('/api/highlights'),
-      ]);
-      allStandings = await standingsRes.json();
-      allMatches = await matchesRes.json();
-      allHighlights = await highlightsRes.json();
-      renderAll();
+      const res = await fetch('/api/data?v=' + Date.now());
+      fullData = normalizeData(await res.json());
+      if (viewRound === null || !fullData.rounds.some(r => r.number === viewRound)) {
+        viewRound = fullData.currentRound;
+      }
+      populateRoundSelect();
+      applyRound();
       updateTimestamp();
     } catch(e) {
       console.error('Error cargando datos:', e);
     }
   }
+
+  let fullData = null;
+  let viewRound = null;
+
+  function normalizeData(data) {
+    if (data.rounds) return data;
+    // compat con el formato antiguo (una sola ronda implícita)
+    return {
+      currentRound: 2, latestRound: 2,
+      rounds: [{ number: 2, standings: data.standings || {}, matches: data.matches || [] }],
+      highlights: data.highlights || {}, updatedAt: data.updatedAt || null,
+    };
+  }
+
+  function populateRoundSelect() {
+    const sel = document.getElementById('round-select');
+    sel.innerHTML = fullData.rounds.map(r =>
+      `<option value="${r.number}" ${r.number === viewRound ? 'selected' : ''}>Ronda ${r.number}${r.number === fullData.currentRound ? ' · actual' : ''}</option>`
+    ).join('');
+  }
+
+  function applyRound() {
+    const round = fullData.rounds.find(r => r.number === viewRound) || fullData.rounds[fullData.rounds.length - 1];
+    allStandings = round.standings || {};
+    allMatches = round.matches || [];
+    allPlayers = Object.values(allStandings).flat();
+    // Hipótesis solo en la ronda actual; las históricas están cerradas
+    allHighlights = (viewRound === fullData.currentRound) ? (fullData.highlights || {}) : null;
+    renderAll();
+  }
+
+  document.getElementById('round-select').addEventListener('change', e => {
+    viewRound = parseInt(e.target.value);
+    applyRound();
+  });
+
 
   function updateTimestamp() {
     const lastMatch = allMatches[0];
@@ -874,6 +920,12 @@
   };
 
   function renderTablon(groupNum) {
+    if (allHighlights === null) {
+      const div = document.createElement('div');
+      div.className = 'tablon';
+      div.innerHTML = `<div class="tablon-header">Tablón</div><div class="tablon-item" style="color:var(--muted)"><div class="tablon-dot t-safe"></div><span>🔒 Ronda finalizada — clasificación definitiva.</span></div>`;
+      return div;
+    }
     const data = allHighlights[groupNum] || {};
     const confirmed   = Array.isArray(data) ? data : (data.confirmed   || []);
     const predictions = Array.isArray(data) ? []   : (data.predictions || []);
@@ -952,10 +1004,11 @@
       matchLookup[key] = m;
     }
 
-    for (let g = 1; g <= 4; g++) {
+    const groupNums = Object.keys(allStandings).map(Number).sort((a, b) => a - b);
+    for (const g of groupNums) {
       const players = allStandings[g] || [];
-      const color = GROUP_COLORS[g];
-      const colorLight = GROUP_COLORS_LIGHT[g];
+      const color = GROUP_COLORS[((g - 1) % 4) + 1];
+      const colorLight = GROUP_COLORS_LIGHT[((g - 1) % 4) + 1];
       const totalPlayers = players.length;
       const matchesInGroup = allMatches.filter(m => m.group_number === g).length;
 
@@ -987,7 +1040,7 @@
         <div class="group-card-header">
           <div class="group-name">
             <div class="group-badge" style="background:linear-gradient(135deg,${color},${colorLight})">${g}</div>
-            ${GROUPS[g]}
+            GRUPO ${g}
           </div>
           <div class="group-meta">${totalPlayers} jugadores · ${matchesInGroup} partido${matchesInGroup !== 1 ? 's' : ''}</div>
         </div>

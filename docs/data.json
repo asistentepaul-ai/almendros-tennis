@@ -1,4 +1,691 @@
 {
+  "currentRound": 2,
+  "latestRound": 2,
+  "rounds": [
+    {
+      "number": 2,
+      "standings": {
+        "1": [
+          {
+            "id": 3,
+            "name": "Raul",
+            "group_number": 1,
+            "matchesPlayed": 2,
+            "wins": 2,
+            "losses": 0,
+            "gamesWon": 12,
+            "gamesLost": 9,
+            "gamesDiff": 3,
+            "points": 16
+          },
+          {
+            "id": 2,
+            "name": "Javi",
+            "group_number": 1,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 12,
+            "gamesLost": 16,
+            "gamesDiff": -4,
+            "points": 14
+          },
+          {
+            "id": 1,
+            "name": "Pepe",
+            "group_number": 1,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 11,
+            "gamesLost": 13,
+            "gamesDiff": -2,
+            "points": 13
+          },
+          {
+            "id": 4,
+            "name": "Pablo",
+            "group_number": 1,
+            "matchesPlayed": 2,
+            "wins": 1,
+            "losses": 1,
+            "gamesWon": 10,
+            "gamesLost": 7,
+            "gamesDiff": 3,
+            "points": 12
+          }
+        ],
+        "2": [
+          {
+            "id": 6,
+            "name": "Mario",
+            "group_number": 2,
+            "matchesPlayed": 3,
+            "wins": 3,
+            "losses": 0,
+            "gamesWon": 18,
+            "gamesLost": 6,
+            "gamesDiff": 12,
+            "points": 24
+          },
+          {
+            "id": 7,
+            "name": "Jorge",
+            "group_number": 2,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 11,
+            "gamesLost": 15,
+            "gamesDiff": -4,
+            "points": 13
+          },
+          {
+            "id": 8,
+            "name": "Alex",
+            "group_number": 2,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 10,
+            "gamesLost": 12,
+            "gamesDiff": -2,
+            "points": 12
+          },
+          {
+            "id": 5,
+            "name": "Sergio",
+            "group_number": 2,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 9,
+            "gamesLost": 15,
+            "gamesDiff": -6,
+            "points": 11
+          }
+        ],
+        "3": [
+          {
+            "id": 9,
+            "name": "Chus",
+            "group_number": 3,
+            "matchesPlayed": 3,
+            "wins": 3,
+            "losses": 0,
+            "gamesWon": 19,
+            "gamesLost": 8,
+            "gamesDiff": 11,
+            "points": 25
+          },
+          {
+            "id": 12,
+            "name": "Dani",
+            "group_number": 3,
+            "matchesPlayed": 4,
+            "wins": 2,
+            "losses": 2,
+            "gamesWon": 17,
+            "gamesLost": 16,
+            "gamesDiff": 1,
+            "points": 21
+          },
+          {
+            "id": 13,
+            "name": "Carlos DM",
+            "group_number": 3,
+            "matchesPlayed": 2,
+            "wins": 1,
+            "losses": 1,
+            "gamesWon": 9,
+            "gamesLost": 7,
+            "gamesDiff": 2,
+            "points": 11
+          },
+          {
+            "id": 10,
+            "name": "Jacobo",
+            "group_number": 3,
+            "matchesPlayed": 3,
+            "wins": 1,
+            "losses": 2,
+            "gamesWon": 9,
+            "gamesLost": 13,
+            "gamesDiff": -4,
+            "points": 11
+          },
+          {
+            "id": 11,
+            "name": "JJ",
+            "group_number": 3,
+            "matchesPlayed": 4,
+            "wins": 1,
+            "losses": 3,
+            "gamesWon": 8,
+            "gamesLost": 18,
+            "gamesDiff": -10,
+            "points": 10
+          }
+        ],
+        "4": [
+          {
+            "id": 14,
+            "name": "Carlitos",
+            "group_number": 4,
+            "matchesPlayed": 0,
+            "wins": 0,
+            "losses": 0,
+            "gamesWon": 0,
+            "gamesLost": 0,
+            "gamesDiff": 0,
+            "points": 0
+          },
+          {
+            "id": 15,
+            "name": "Guille",
+            "group_number": 4,
+            "matchesPlayed": 0,
+            "wins": 0,
+            "losses": 0,
+            "gamesWon": 0,
+            "gamesLost": 0,
+            "gamesDiff": 0,
+            "points": 0
+          },
+          {
+            "id": 16,
+            "name": "Juan",
+            "group_number": 4,
+            "matchesPlayed": 0,
+            "wins": 0,
+            "losses": 0,
+            "gamesWon": 0,
+            "gamesLost": 0,
+            "gamesDiff": 0,
+            "points": 0
+          },
+          {
+            "id": 17,
+            "name": "Rober",
+            "group_number": 4,
+            "matchesPlayed": 0,
+            "wins": 0,
+            "losses": 0,
+            "gamesWon": 0,
+            "gamesLost": 0,
+            "gamesDiff": 0,
+            "points": 0
+          }
+        ]
+      },
+      "matches": [
+        {
+          "id": 22,
+          "player1_id": 5,
+          "player2_id": 7,
+          "player1_games": 6,
+          "player2_games": 3,
+          "winner_id": 5,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T14:04:18.325Z",
+          "raw_input": "sergio gana. jorge 6 3",
+          "added_by": "Pablo",
+          "player1_name": "Sergio",
+          "player2_name": "Jorge",
+          "winner_name": "Sergio",
+          "group_number": 2
+        },
+        {
+          "id": 21,
+          "player1_id": 7,
+          "player2_id": 6,
+          "player1_games": 2,
+          "player2_games": 6,
+          "winner_id": 6,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T13:19:33.380Z",
+          "raw_input": "Jorge Mario 2 6",
+          "added_by": "Pablo",
+          "player1_name": "Jorge",
+          "player2_name": "Mario",
+          "winner_name": "Mario",
+          "group_number": 2
+        },
+        {
+          "id": 20,
+          "player1_id": 9,
+          "player2_id": 12,
+          "player1_games": 7,
+          "player2_games": 5,
+          "winner_id": 9,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:39:58.171Z",
+          "raw_input": "Chus ganó a Dani 7 5",
+          "added_by": "Pablo",
+          "player1_name": "Chus",
+          "player2_name": "Dani",
+          "winner_name": "Chus",
+          "group_number": 3
+        },
+        {
+          "id": 19,
+          "player1_id": 12,
+          "player2_id": 11,
+          "player1_games": 0,
+          "player2_games": 6,
+          "winner_id": 11,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:38:23.628Z",
+          "raw_input": "Dani 0 JJ 6",
+          "added_by": "Pablo",
+          "player1_name": "Dani",
+          "player2_name": "JJ",
+          "winner_name": "JJ",
+          "group_number": 3
+        },
+        {
+          "id": 18,
+          "player1_id": 13,
+          "player2_id": 11,
+          "player1_games": 6,
+          "player2_games": 1,
+          "winner_id": 13,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:35:38.599Z",
+          "raw_input": "Carlos 6 JJ 1",
+          "added_by": "Pablo",
+          "player1_name": "Carlos DM",
+          "player2_name": "JJ",
+          "winner_name": "Carlos DM",
+          "group_number": 3
+        },
+        {
+          "id": 17,
+          "player1_id": 12,
+          "player2_id": 13,
+          "player1_games": 6,
+          "player2_games": 3,
+          "winner_id": 12,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:34:52.132Z",
+          "raw_input": "Dani Carlos 6-3",
+          "added_by": "Pablo",
+          "player1_name": "Dani",
+          "player2_name": "Carlos DM",
+          "winner_name": "Dani",
+          "group_number": 3
+        },
+        {
+          "id": 16,
+          "player1_id": 10,
+          "player2_id": 11,
+          "player1_games": 6,
+          "player2_games": 1,
+          "winner_id": 10,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:34:33.262Z",
+          "raw_input": "Jacobo JJ 6-1",
+          "added_by": "Pablo",
+          "player1_name": "Jacobo",
+          "player2_name": "JJ",
+          "winner_name": "Jacobo",
+          "group_number": 3
+        },
+        {
+          "id": 15,
+          "player1_id": 12,
+          "player2_id": 10,
+          "player1_games": 6,
+          "player2_games": 0,
+          "winner_id": 12,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:33:20.309Z",
+          "raw_input": "Dani 6 Jacobo 0",
+          "added_by": "Pablo",
+          "player1_name": "Dani",
+          "player2_name": "Jacobo",
+          "winner_name": "Dani",
+          "group_number": 3
+        },
+        {
+          "id": 14,
+          "player1_id": 9,
+          "player2_id": 11,
+          "player1_games": 6,
+          "player2_games": 0,
+          "winner_id": 9,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:32:58.379Z",
+          "raw_input": "Chus 6 jj0",
+          "added_by": "Pablo",
+          "player1_name": "Chus",
+          "player2_name": "JJ",
+          "winner_name": "Chus",
+          "group_number": 3
+        },
+        {
+          "id": 13,
+          "player1_id": 8,
+          "player2_id": 6,
+          "player1_games": 1,
+          "player2_games": 6,
+          "winner_id": 6,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T12:00:34.431Z",
+          "raw_input": "Alex 1 Mario 6",
+          "added_by": "Pablo",
+          "player1_name": "Alex",
+          "player2_name": "Mario",
+          "winner_name": "Mario",
+          "group_number": 2
+        },
+        {
+          "id": 12,
+          "player1_id": 5,
+          "player2_id": 8,
+          "player1_games": 0,
+          "player2_games": 6,
+          "winner_id": 8,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T11:58:10.633Z",
+          "raw_input": "Sergio 0 Alex 6",
+          "added_by": "Pablo",
+          "player1_name": "Sergio",
+          "player2_name": "Alex",
+          "winner_name": "Alex",
+          "group_number": 2
+        },
+        {
+          "id": 11,
+          "player1_id": 8,
+          "player2_id": 7,
+          "player1_games": 3,
+          "player2_games": 6,
+          "winner_id": 7,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T11:55:53.714Z",
+          "raw_input": "Alex 3 jorge 6",
+          "added_by": "Pablo",
+          "player1_name": "Alex",
+          "player2_name": "Jorge",
+          "winner_name": "Jorge",
+          "group_number": 2
+        },
+        {
+          "id": 10,
+          "player1_id": 6,
+          "player2_id": 5,
+          "player1_games": 6,
+          "player2_games": 3,
+          "winner_id": 6,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-30T11:54:37.239Z",
+          "raw_input": "Mario Sergio 6 3",
+          "added_by": "Pablo",
+          "player1_name": "Mario",
+          "player2_name": "Sergio",
+          "winner_name": "Mario",
+          "group_number": 2
+        },
+        {
+          "id": 9,
+          "player1_id": 9,
+          "player2_id": 10,
+          "player1_games": 6,
+          "player2_games": 3,
+          "winner_id": 9,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T20:27:10.740Z",
+          "raw_input": "Chus y Jacobo quedaron 6-3",
+          "added_by": "Pablo",
+          "player1_name": "Chus",
+          "player2_name": "Jacobo",
+          "winner_name": "Chus",
+          "group_number": 3
+        },
+        {
+          "id": 8,
+          "player1_id": 4,
+          "player2_id": 1,
+          "player1_games": 6,
+          "player2_games": 1,
+          "winner_id": 4,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T20:17:08.676Z",
+          "raw_input": "pablo 6 pepe 1",
+          "added_by": "Pablo",
+          "player1_name": "Pablo",
+          "player2_name": "Pepe",
+          "winner_name": "Pablo",
+          "group_number": 1
+        },
+        {
+          "id": 5,
+          "player1_id": 3,
+          "player2_id": 1,
+          "player1_games": 6,
+          "player2_games": 4,
+          "winner_id": 3,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T19:56:03.673Z",
+          "raw_input": "Raul Pepe 6-4",
+          "added_by": "Pablo",
+          "player1_name": "Raul",
+          "player2_name": "Pepe",
+          "winner_name": "Raul",
+          "group_number": 1
+        },
+        {
+          "id": 4,
+          "player1_id": 3,
+          "player2_id": 2,
+          "player1_games": 6,
+          "player2_games": 5,
+          "winner_id": 3,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T19:36:28.385Z",
+          "raw_input": "Raúl Javi 6-5",
+          "added_by": "Pablo",
+          "player1_name": "Raul",
+          "player2_name": "Javi",
+          "winner_name": "Raul",
+          "group_number": 1
+        },
+        {
+          "id": 2,
+          "player1_id": 1,
+          "player2_id": 2,
+          "player1_games": 6,
+          "player2_games": 1,
+          "winner_id": 1,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T13:40:57.790Z",
+          "raw_input": "Pepe ganó a Javi 6-1",
+          "added_by": "web",
+          "player1_name": "Pepe",
+          "player2_name": "Javi",
+          "winner_name": "Pepe",
+          "group_number": 1
+        },
+        {
+          "id": 1,
+          "player1_id": 2,
+          "player2_id": 4,
+          "player1_games": 6,
+          "player2_games": 4,
+          "winner_id": 2,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-29T13:21:22.797Z",
+          "raw_input": "Hola, Javi ganó a Pablo 6-4",
+          "added_by": "Pablo",
+          "player1_name": "Javi",
+          "player2_name": "Pablo",
+          "winner_name": "Javi",
+          "group_number": 1
+        }
+      ]
+    }
+  ],
+  "highlights": {
+    "1": {
+      "confirmed": [],
+      "predictions": [
+        {
+          "type": "conditional_first",
+          "player": "Pablo",
+          "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
+        },
+        {
+          "type": "conditional_first",
+          "player": "Raul",
+          "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+        },
+        {
+          "type": "conditional_safe",
+          "player": "Pablo",
+          "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
+        },
+        {
+          "type": "conditional_last",
+          "player": "Pepe",
+          "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
+        }
+      ]
+    },
+    "2": {
+      "confirmed": [
+        {
+          "type": "confirmed_first",
+          "player": "Mario",
+          "text": "Mario está matemáticamente clasificado como primero de grupo."
+        },
+        {
+          "type": "confirmed_last",
+          "player": "Sergio",
+          "text": "Sergio no puede evitar terminar último de grupo."
+        }
+      ],
+      "predictions": []
+    },
+    "3": {
+      "confirmed": [
+        {
+          "type": "confirmed_last",
+          "player": "JJ",
+          "text": "JJ no puede evitar terminar último de grupo."
+        },
+        {
+          "type": "safe",
+          "player": "Carlos DM",
+          "text": "Carlos DM ya no puede terminar último de grupo."
+        }
+      ],
+      "predictions": [
+        {
+          "type": "conditional_first",
+          "player": "Chus",
+          "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
+          "styled": true
+        }
+      ]
+    },
+    "4": {
+      "confirmed": [],
+      "predictions": []
+    }
+  },
+  "highlightsCache": {
+    "hash": "8bb104ba",
+    "version": 8,
+    "highlights": {
+      "1": {
+        "confirmed": [],
+        "predictions": [
+          {
+            "type": "conditional_first",
+            "player": "Pablo",
+            "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
+          },
+          {
+            "type": "conditional_first",
+            "player": "Raul",
+            "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+          },
+          {
+            "type": "conditional_safe",
+            "player": "Pablo",
+            "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
+          },
+          {
+            "type": "conditional_last",
+            "player": "Pepe",
+            "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
+          }
+        ]
+      },
+      "2": {
+        "confirmed": [
+          {
+            "type": "confirmed_first",
+            "player": "Mario",
+            "text": "Mario está matemáticamente clasificado como primero de grupo."
+          },
+          {
+            "type": "confirmed_last",
+            "player": "Sergio",
+            "text": "Sergio no puede evitar terminar último de grupo."
+          }
+        ],
+        "predictions": []
+      },
+      "3": {
+        "confirmed": [
+          {
+            "type": "confirmed_last",
+            "player": "JJ",
+            "text": "JJ no puede evitar terminar último de grupo."
+          },
+          {
+            "type": "safe",
+            "player": "Carlos DM",
+            "text": "Carlos DM ya no puede terminar último de grupo."
+          }
+        ],
+        "predictions": [
+          {
+            "type": "conditional_first",
+            "player": "Chus",
+            "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
+            "styled": true
+          }
+        ]
+      },
+      "4": {
+        "confirmed": [],
+        "predictions": []
+      }
+    }
+  },
+  "updatedAt": "2026-07-30T14:23:42.964Z",
   "players": [
     {
       "id": 1,
@@ -624,148 +1311,5 @@
         "points": 0
       }
     ]
-  },
-  "highlights": {
-    "1": {
-      "confirmed": [],
-      "predictions": [
-        {
-          "type": "conditional_first",
-          "player": "Pablo",
-          "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
-        },
-        {
-          "type": "conditional_first",
-          "player": "Raul",
-          "text": "Si Raul gana a Pablo, Raul es primero. Si Raul pierde 7-6, Raul sigue siendo primero.",
-          "styled": true
-        },
-        {
-          "type": "conditional_safe",
-          "player": "Pablo",
-          "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
-        },
-        {
-          "type": "conditional_last",
-          "player": "Pepe",
-          "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
-        }
-      ]
-    },
-    "2": {
-      "confirmed": [
-        {
-          "type": "confirmed_first",
-          "player": "Mario",
-          "text": "Mario está matemáticamente clasificado como primero de grupo."
-        },
-        {
-          "type": "confirmed_last",
-          "player": "Sergio",
-          "text": "Sergio no puede evitar terminar último de grupo."
-        }
-      ],
-      "predictions": []
-    },
-    "3": {
-      "confirmed": [
-        {
-          "type": "confirmed_last",
-          "player": "JJ",
-          "text": "JJ no puede evitar terminar último de grupo."
-        },
-        {
-          "type": "safe",
-          "player": "Carlos DM",
-          "text": "Carlos DM ya no puede terminar último de grupo."
-        }
-      ],
-      "predictions": [
-        {
-          "type": "conditional_first",
-          "player": "Chus",
-          "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM le gana a Jacobo, entonces Chus pierde el primer puesto.",
-          "styled": true
-        }
-      ]
-    },
-    "4": {
-      "confirmed": [],
-      "predictions": []
-    }
-  },
-  "highlightsCache": {
-    "hash": "8bb104ba",
-    "version": 8,
-    "highlights": {
-      "1": {
-        "confirmed": [],
-        "predictions": [
-          {
-            "type": "conditional_first",
-            "player": "Pablo",
-            "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
-          },
-          {
-            "type": "conditional_first",
-            "player": "Raul",
-            "text": "Si Raul gana a Pablo, Raul es primero. Si Raul pierde 7-6, Raul sigue siendo primero.",
-            "styled": true
-          },
-          {
-            "type": "conditional_safe",
-            "player": "Pablo",
-            "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
-          },
-          {
-            "type": "conditional_last",
-            "player": "Pepe",
-            "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
-          }
-        ]
-      },
-      "2": {
-        "confirmed": [
-          {
-            "type": "confirmed_first",
-            "player": "Mario",
-            "text": "Mario está matemáticamente clasificado como primero de grupo."
-          },
-          {
-            "type": "confirmed_last",
-            "player": "Sergio",
-            "text": "Sergio no puede evitar terminar último de grupo."
-          }
-        ],
-        "predictions": []
-      },
-      "3": {
-        "confirmed": [
-          {
-            "type": "confirmed_last",
-            "player": "JJ",
-            "text": "JJ no puede evitar terminar último de grupo."
-          },
-          {
-            "type": "safe",
-            "player": "Carlos DM",
-            "text": "Carlos DM ya no puede terminar último de grupo."
-          }
-        ],
-        "predictions": [
-          {
-            "type": "conditional_first",
-            "player": "Chus",
-            "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM le gana a Jacobo, entonces Chus pierde el primer puesto.",
-            "styled": true
-          }
-        ]
-      },
-      "4": {
-        "confirmed": [],
-        "predictions": []
-      }
-    }
-  },
-  "updatedAt": "2026-07-30T14:04:21.576Z"
+  }
 }

@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const { exec } = require('child_process');
 const path = require('path');
 const { parseMatchResult } = require('./parser');
-const { findPlayer, findPlayerExact, addMatch, deleteMatch, clearMatches, matchExists, getStandings, getRecentMatches, getAllPlayers } = require('./db');
+const { findPlayer, findPlayerExact, addMatch, deleteMatch, clearMatches, matchExists, getStandings, getRecentMatches, getAllPlayers, listRounds, createRound } = require('./db');
 
 // Pending overwrite requests: chatId -> { matchId, newMatchData, p1, p2, parsed }
 const pendingOverwrites = new Map();
@@ -10,6 +10,8 @@ const pendingOverwrites = new Map();
 const pendingDeletes = new Map();
 // Pending reinicio confirmations: Set of chatIds
 const pendingReinicio = new Set();
+// Pending new-round requests: chatId -> { number, groups }
+const pendingNewRounds = new Map();
 
 function triggerSync() {
   const script = path.join(__dirname, 'sync-to-github.sh');
@@ -32,11 +34,10 @@ const bot = new TelegramBot(token, { polling: true });
 console.log('🤖 Bot de Telegram iniciado');
 
 function formatStandings(standings) {
-  const groupNames = { 1: 'GRUPO 1', 2: 'GRUPO 2', 3: 'GRUPO 3', 4: 'GRUPO 4' };
-
-  let text = '';
+  const info = listRounds();
+  let text = `🏁 *RONDA ${info.currentRound}*\n`;
   for (const [g, players] of Object.entries(standings)) {
-    text += `\n*${groupNames[g]}*\n`;
+    text += `\n*GRUPO ${g}*\n`;
     players.forEach((p, i) => {
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i === players.length - 1 ? '🔻' : '·';
       text += `${medal} ${p.name} — ${p.points}pts (${p.wins}V/${p.losses}D, ${p.gamesWon}JG)\n`;
@@ -69,6 +70,91 @@ function formatExistingMatch(match) {
 
 function looksLikeDeleteRequest(text) {
   return /\b(borra|borrar|borre|elimina|eliminar|elimine|quita|quitar|quite|cancela|cancelar)\b/i.test(text);
+}
+
+
+// ─── Crear ronda nueva por lenguaje natural ───────────────────────────────────
+
+function looksLikeNewRound(text) {
+  return /ronda\s*(?:n[úu]mero\s*)?\d+/i.test(text) && /grupo\s*\d+/i.test(text);
+}
+
+// Parse determinista: "Ronda 3. Grupo 1: A, B, C. Grupo 2: D, E y F"
+function regexParseRound(text) {
+  const mRonda = text.match(/ronda\s*(?:n[úu]mero\s*)?(\d+)/i);
+  if (!mRonda) return null;
+  const number = parseInt(mRonda[1]);
+
+  const groups = {};
+  const re = /grupo\s*(\d+)\s*[:\-–]?\s*([^]*?)(?=grupo\s*\d+|$)/gi;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const g = parseInt(m[1]);
+    const names = m[2]
+      .split(/[,;\n]| y /i)
+      .map(s => s.replace(/[.·•]+\s*$/, '').trim())
+      .filter(s => s && s.length <= 30 && !/^(ronda|con|los|las|jugadores?)$/i.test(s));
+    if (names.length >= 2) groups[g] = names;
+  }
+  if (Object.keys(groups).length === 0) return null;
+  return { number, groups };
+}
+
+async function aiParseRound(text) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return null;
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-haiku-4.5';
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model, max_tokens: 400,
+        messages: [{ role: 'user', content:
+`Extrae la definición de una ronda de un torneo de tenis de este mensaje:
+"${text}"
+Responde SOLO con JSON (sin markdown): {"number": N, "groups": {"1": ["nombre", ...], "2": [...]}}
+Si no puedes, responde: null` }],
+      }),
+    });
+    if (!res.ok) { console.error(`aiParseRound: HTTP ${res.status}`); return null; }
+    const data = await res.json();
+    let content = data.choices?.[0]?.message?.content?.trim();
+    if (!content || content === 'null') return null;
+    content = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const parsed = JSON.parse(content);
+    if (!parsed?.number || !parsed?.groups) return null;
+    return parsed;
+  } catch { return null; }
+}
+
+async function handleNewRound(chatId, text) {
+  pendingOverwrites.delete(chatId);
+  pendingDeletes.delete(chatId);
+
+  const parsed = regexParseRound(text) || await aiParseRound(text);
+  if (!parsed) {
+    return bot.sendMessage(chatId,
+      '❓ No pude interpretar la ronda.\n\nFormato de ejemplo:\n"Nueva ronda 3. Grupo 1: Raul, Javi, Mario, Chus. Grupo 2: Pablo, Pepe, Jorge y Dani"'
+    );
+  }
+
+  const existing = listRounds().rounds.find(r => r.number === parsed.number);
+  if (existing) {
+    return bot.sendMessage(chatId,
+      `❌ La ronda *${parsed.number}* ya existe (${existing.matches} partidos). Elige otro número.`,
+      { parse_mode: 'Markdown' }
+    );
+  }
+
+  const resumen = Object.entries(parsed.groups)
+    .map(([g, names]) => `*Grupo ${g}*: ${names.join(', ')}`)
+    .join('\n');
+  pendingNewRounds.set(chatId, parsed);
+  bot.sendMessage(chatId,
+    `🆕 *Crear Ronda ${parsed.number}*\n\n${resumen}\n\n⚠️ A partir de su creación, los resultados nuevos se registrarán en esta ronda. Las rondas anteriores quedan como histórico.\n\nResponde /si para confirmar o /no para cancelar.`,
+    { parse_mode: 'Markdown' }
+  );
 }
 
 async function handleDeleteRequest(chatId, text) {
@@ -126,7 +212,7 @@ async function handleResult(chatId, text, senderName) {
   if (!p1 || !p2) {
     const missing = [!p1 && parsed.player1, !p2 && parsed.player2].filter(Boolean).join(' y ');
     return bot.sendMessage(chatId,
-      `❌ Jugador no reconocido: *${missing}*\n\nNombres válidos: Pepe, Javi, Raul, Pablo, Sergio, Mario, Jorge, Alex, Chus, Jacobo, JJ, Dani, Carlos DM, Carlitos, Guille, Juan, Rober`,
+      `❌ Jugador no reconocido: *${missing}*\n\nJugadores de la ronda actual: ${getAllPlayers().map(p => p.name).join(', ')}`,
       { parse_mode: 'Markdown' }
     );
   }
@@ -197,6 +283,21 @@ bot.onText(/\/confirmar/, (msg) => {
 });
 
 bot.onText(/\/si/, (msg) => {
+  const pendingRound = pendingNewRounds.get(msg.chat.id);
+  if (pendingRound) {
+    pendingNewRounds.delete(msg.chat.id);
+    try {
+      const r = createRound(pendingRound.number, pendingRound.groups);
+      triggerSync();
+      const nuevos = r.newPlayers.length ? `\n👤 Jugadores nuevos dados de alta: ${r.newPlayers.join(', ')}` : '';
+      return bot.sendMessage(msg.chat.id,
+        `✅ *Ronda ${r.number} creada*${nuevos}\n\nYa puedes registrar resultados de esta ronda con normalidad ("X ganó a Y 6-3"). La web mostrará la Ronda ${r.number} en cuanto tenga su primer resultado.`,
+        { parse_mode: 'Markdown' }
+      );
+    } catch (e) {
+      return bot.sendMessage(msg.chat.id, `❌ No se pudo crear la ronda: ${e.message}`);
+    }
+  }
   const pendingDel = pendingDeletes.get(msg.chat.id);
   if (pendingDel) {
     pendingDeletes.delete(msg.chat.id);
@@ -215,6 +316,10 @@ bot.onText(/\/si/, (msg) => {
 });
 
 bot.onText(/\/no/, (msg) => {
+  if (pendingNewRounds.has(msg.chat.id)) {
+    pendingNewRounds.delete(msg.chat.id);
+    return bot.sendMessage(msg.chat.id, '↩️ Creación de ronda cancelada.');
+  }
   if (pendingReinicio.has(msg.chat.id)) {
     pendingReinicio.delete(msg.chat.id);
     return bot.sendMessage(msg.chat.id, '↩️ Reinicio cancelado. Los datos se mantienen intactos.');
@@ -252,7 +357,10 @@ bot.onText(/\/ayuda/, (msg) => {
     `/ayuda — Este mensaje\n\n` +
     `*Para borrar un resultado:*\n` +
     `• "borra el resultado de Raúl y Pablo"\n` +
-    `• "elimina el partido de Chus y JJ"`,
+    `• "elimina el partido de Chus y JJ"\n\n` +
+    `*Para crear una ronda nueva:*\n` +
+    `• "Nueva ronda 3. Grupo 1: Raul, Javi, Mario, Chus. Grupo 2: Pablo, Pepe, Jorge y Dani"\n` +
+    `Los resultados nuevos irán a la última ronda creada; las anteriores quedan como histórico en la web.`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -260,6 +368,11 @@ bot.onText(/\/ayuda/, (msg) => {
 bot.on('message', async (msg) => {
   if (!msg.text) return;
   if (msg.text.startsWith('/')) return;
+
+  if (looksLikeNewRound(msg.text)) {
+    await handleNewRound(msg.chat.id, msg.text);
+    return;
+  }
 
   if (looksLikeDeleteRequest(msg.text)) {
     await handleDeleteRequest(msg.chat.id, msg.text);

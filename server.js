@@ -5,6 +5,7 @@ const { exec } = require('child_process');
 const { getStandings, getRecentMatches, addMatch, deleteMatch, findPlayer, findPlayerExact, matchExists, getAllPlayers } = require('./db');
 const { parseMatchResult } = require('./parser');
 const { computeHighlights } = require('./highlights');
+const { buildExportData } = require('./export');
 
 let highlightsCache = null;
 
@@ -24,12 +25,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 require('./bot');
 
 app.get('/api/standings', (req, res) => {
-  res.json(getStandings());
+  const round = req.query.round ? parseInt(req.query.round) : null;
+  res.json(getStandings(round));
 });
 
 app.get('/api/matches', (req, res) => {
   const limit = parseInt(req.query.limit) || 30;
-  res.json(getRecentMatches(limit));
+  const round = req.query.round ? parseInt(req.query.round) : null;
+  res.json(getRecentMatches(limit, round));
+});
+
+// Paquete completo multi-ronda (mismo shape que docs/data.json)
+app.get('/api/data', async (req, res) => {
+  try {
+    const result = await buildExportData(highlightsCache?.highlightsCache || null);
+    highlightsCache = result;
+    res.json(result);
+  } catch (e) {
+    console.error('Data export error:', e.message);
+    res.status(500).json({ error: 'export failed' });
+  }
 });
 
 app.get('/api/players', (req, res) => {

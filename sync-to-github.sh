@@ -18,6 +18,22 @@ cd "$REPO_DIR"
 node --input-type=module <<'EOF'
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
+const { buildExportData } = require('./export');
+const fs = require('fs');
+
+// Cache de highlights previa (evita recomputar si la clasificación no cambió)
+let cached = null;
+try {
+  const prev = JSON.parse(fs.readFileSync('docs/data.json', 'utf8'));
+  cached = prev.highlightsCache || null;
+} catch (_) {}
+
+const data = await buildExportData(cached);
+fs.writeFileSync('docs/data.json', JSON.stringify(data, null, 2));
+console.log('data.json actualizado: ronda', data.currentRound, 'de', data.rounds.length, 'rondas');
+EOF'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const { getStandings, getRecentMatches, getAllPlayers } = require('./db');
 const { computeHighlights } = require('./highlights');
 const fs = require('fs');
@@ -39,7 +55,7 @@ const data = {
   matches,
   standings,
   highlights: highlightsResult.highlights,
-  highlightsCache: { hash: highlightsResult.hash, highlights: highlightsResult.highlights },
+  highlightsCache: { hash: highlightsResult.hash, version: highlightsResult.version, highlights: highlightsResult.highlights },
   updatedAt: new Date().toISOString(),
 };
 fs.writeFileSync('docs/data.json', JSON.stringify(data, null, 2));
