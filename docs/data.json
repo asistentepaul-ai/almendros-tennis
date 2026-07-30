@@ -88,6 +88,23 @@
   ],
   "matches": [
     {
+      "id": 21,
+      "player1_id": 7,
+      "player2_id": 6,
+      "player1_games": 2,
+      "player2_games": 6,
+      "winner_id": 6,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-30T13:19:33.380Z",
+      "raw_input": "Jorge Mario 2 6",
+      "added_by": "Pablo",
+      "player1_name": "Jorge",
+      "player2_name": "Mario",
+      "winner_name": "Mario",
+      "group_number": 2
+    },
+    {
       "id": 20,
       "player1_id": 9,
       "player2_id": 12,
@@ -309,23 +326,6 @@
       "group_number": 1
     },
     {
-      "id": 7,
-      "player1_id": 6,
-      "player2_id": 7,
-      "player1_games": 6,
-      "player2_games": 3,
-      "winner_id": 6,
-      "is_tiebreak": 0,
-      "tiebreak_score": null,
-      "played_at": "2026-07-29T20:15:44.927Z",
-      "raw_input": "Mario ganó a jorge 6 a 3",
-      "added_by": "Pablo",
-      "player1_name": "Mario",
-      "player2_name": "Jorge",
-      "winner_name": "Mario",
-      "group_number": 2
-    },
-    {
       "id": 5,
       "player1_id": 3,
       "player2_id": 1,
@@ -471,8 +471,8 @@
         "wins": 3,
         "losses": 0,
         "gamesWon": 18,
-        "gamesLost": 7,
-        "gamesDiff": 11,
+        "gamesLost": 6,
+        "gamesDiff": 12,
         "points": 24
       },
       {
@@ -494,10 +494,10 @@
         "matchesPlayed": 2,
         "wins": 1,
         "losses": 1,
-        "gamesWon": 9,
+        "gamesWon": 8,
         "gamesLost": 9,
-        "gamesDiff": 0,
-        "points": 11
+        "gamesDiff": -1,
+        "points": 10
       },
       {
         "id": 5,
@@ -653,7 +653,7 @@
         {
           "type": "conditional_safe",
           "player": "Sergio",
-          "text": "Sergio se salva del último puesto si gana a Jorge exactamente 6-0."
+          "text": "Sergio se salva del último puesto si gana a Jorge por 6-1 o más."
         }
       ]
     },
@@ -684,7 +684,7 @@
     }
   },
   "highlightsCache": {
-    "hash": "51b5c9e0",
+    "hash": "9e628566",
     "version": 5,
     "highlights": {
       "1": {
@@ -714,7 +714,7 @@
           {
             "type": "conditional_safe",
             "player": "Sergio",
-            "text": "Sergio se salva del último puesto si gana a Jorge exactamente 6-0."
+            "text": "Sergio se salva del último puesto si gana a Jorge por 6-1 o más."
           }
         ]
       },
@@ -745,5 +745,5 @@
       }
     }
   },
-  "updatedAt": "2026-07-30T13:15:04.372Z"
+  "updatedAt": "2026-07-30T13:19:33.478Z"
 }
