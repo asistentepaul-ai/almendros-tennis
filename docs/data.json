@@ -34,18 +34,6 @@
             "id": 1,
             "name": "Pepe",
             "group_number": 1,
-            "matchesPlayed": 3,
-            "wins": 1,
-            "losses": 2,
-            "gamesWon": 11,
-            "gamesLost": 13,
-            "gamesDiff": -2,
-            "points": 13
-          },
-          {
-            "id": 4,
-            "name": "Pablo",
-            "group_number": 1,
             "matchesPlayed": 2,
             "wins": 1,
             "losses": 1,
@@ -53,6 +41,18 @@
             "gamesLost": 7,
             "gamesDiff": 3,
             "points": 12
+          },
+          {
+            "id": 4,
+            "name": "Pablo",
+            "group_number": 1,
+            "matchesPlayed": 1,
+            "wins": 0,
+            "losses": 1,
+            "gamesWon": 4,
+            "gamesLost": 6,
+            "gamesDiff": -2,
+            "points": 4
           }
         ],
         "2": [
@@ -475,23 +475,6 @@
           "group_number": 3
         },
         {
-          "id": 8,
-          "player1_id": 4,
-          "player2_id": 1,
-          "player1_games": 6,
-          "player2_games": 1,
-          "winner_id": 4,
-          "is_tiebreak": 0,
-          "tiebreak_score": null,
-          "played_at": "2026-07-29T20:17:08.676Z",
-          "raw_input": "pablo 6 pepe 1",
-          "added_by": "Pablo",
-          "player1_name": "Pablo",
-          "player2_name": "Pepe",
-          "winner_name": "Pablo",
-          "group_number": 1
-        },
-        {
           "id": 5,
           "player1_id": 3,
           "player2_id": 1,
@@ -569,23 +552,19 @@
         {
           "type": "conditional_first",
           "player": "Pablo",
-          "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
+          "text": "Si los resultados pendientes salen bien, Pablo puede terminar primero del grupo.",
+          "styled": true
         },
         {
           "type": "conditional_first",
           "player": "Raul",
-          "text": "Si Raul gana a Pablo, queda primero. Si pierde 7-6, también queda primero.",
-          "styled": true
-        },
-        {
-          "type": "conditional_safe",
-          "player": "Pablo",
-          "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
+          "text": "Raul pierde el primer puesto si Pablo le gana con cualquier marcador salvo 7-6 y además gana a Pepe."
         },
         {
           "type": "conditional_last",
           "player": "Pepe",
-          "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
+          "text": "Si pierde sus próximos partidos, Pepe termina en último lugar del grupo.",
+          "styled": true
         }
       ]
     },
@@ -621,7 +600,7 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Si Carlos DM le gana a Chus 6-2 o más, y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+          "text": "Si Carlos DM le gana a Chus por 6-2 o más Y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
           "styled": true
         }
       ]
@@ -632,7 +611,7 @@
         {
           "type": "conditional_first",
           "player": "Rober",
-          "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y todavía tiene opciones de ganar el grupo.",
+          "text": "Si Rober gana sus partidos pendientes, entonces puede llegar a ganar el grupo aunque ahora esté último.",
           "styled": true
         },
         {
@@ -644,14 +623,14 @@
         {
           "type": "conditional_last",
           "player": "Juan",
-          "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
+          "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar último del grupo.",
           "styled": true
         }
       ]
     }
   },
   "highlightsCache": {
-    "hash": "b498fbcf",
+    "hash": "193dd182",
     "version": 8,
     "highlights": {
       "1": {
@@ -660,23 +639,19 @@
           {
             "type": "conditional_first",
             "player": "Pablo",
-            "text": "Pablo gana el grupo si gana a Raul con cualquier marcador salvo 7-6."
+            "text": "Si los resultados pendientes salen bien, Pablo puede terminar primero del grupo.",
+            "styled": true
           },
           {
             "type": "conditional_first",
             "player": "Raul",
-            "text": "Si Raul gana a Pablo, queda primero. Si pierde 7-6, también queda primero.",
-            "styled": true
-          },
-          {
-            "type": "conditional_safe",
-            "player": "Pablo",
-            "text": "Pablo solo acaba último si Raul gana a Pablo exactamente 6-0; con cualquier otro resultado se salva."
+            "text": "Raul pierde el primer puesto si Pablo le gana con cualquier marcador salvo 7-6 y además gana a Pepe."
           },
           {
             "type": "conditional_last",
             "player": "Pepe",
-            "text": "Pepe acabará último salvo que Raul gane a Pablo exactamente 6-0."
+            "text": "Si pierde sus próximos partidos, Pepe termina en último lugar del grupo.",
+            "styled": true
           }
         ]
       },
@@ -712,7 +687,7 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Si Carlos DM le gana a Chus 6-2 o más, y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+            "text": "Si Carlos DM le gana a Chus por 6-2 o más Y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
             "styled": true
           }
         ]
@@ -723,7 +698,7 @@
           {
             "type": "conditional_first",
             "player": "Rober",
-            "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y todavía tiene opciones de ganar el grupo.",
+            "text": "Si Rober gana sus partidos pendientes, entonces puede llegar a ganar el grupo aunque ahora esté último.",
             "styled": true
           },
           {
@@ -735,14 +710,14 @@
           {
             "type": "conditional_last",
             "player": "Juan",
-            "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
+            "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar último del grupo.",
             "styled": true
           }
         ]
       }
     }
   },
-  "updatedAt": "2026-07-31T08:30:01.897Z",
+  "updatedAt": "2026-07-31T09:31:48.689Z",
   "players": [
     {
       "id": 1,
@@ -1087,23 +1062,6 @@
       "group_number": 3
     },
     {
-      "id": 8,
-      "player1_id": 4,
-      "player2_id": 1,
-      "player1_games": 6,
-      "player2_games": 1,
-      "winner_id": 4,
-      "is_tiebreak": 0,
-      "tiebreak_score": null,
-      "played_at": "2026-07-29T20:17:08.676Z",
-      "raw_input": "pablo 6 pepe 1",
-      "added_by": "Pablo",
-      "player1_name": "Pablo",
-      "player2_name": "Pepe",
-      "winner_name": "Pablo",
-      "group_number": 1
-    },
-    {
       "id": 5,
       "player1_id": 3,
       "player2_id": 1,
@@ -1202,18 +1160,6 @@
         "id": 1,
         "name": "Pepe",
         "group_number": 1,
-        "matchesPlayed": 3,
-        "wins": 1,
-        "losses": 2,
-        "gamesWon": 11,
-        "gamesLost": 13,
-        "gamesDiff": -2,
-        "points": 13
-      },
-      {
-        "id": 4,
-        "name": "Pablo",
-        "group_number": 1,
         "matchesPlayed": 2,
         "wins": 1,
         "losses": 1,
@@ -1221,6 +1167,18 @@
         "gamesLost": 7,
         "gamesDiff": 3,
         "points": 12
+      },
+      {
+        "id": 4,
+        "name": "Pablo",
+        "group_number": 1,
+        "matchesPlayed": 1,
+        "wins": 0,
+        "losses": 1,
+        "gamesWon": 4,
+        "gamesLost": 6,
+        "gamesDiff": -2,
+        "points": 4
       }
     ],
     "2": [
