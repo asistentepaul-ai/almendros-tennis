@@ -172,25 +172,25 @@
             "id": 14,
             "name": "Carlitos",
             "group_number": 4,
-            "matchesPlayed": 0,
-            "wins": 0,
+            "matchesPlayed": 1,
+            "wins": 1,
             "losses": 0,
-            "gamesWon": 0,
-            "gamesLost": 0,
-            "gamesDiff": 0,
-            "points": 0
+            "gamesWon": 6,
+            "gamesLost": 3,
+            "gamesDiff": 3,
+            "points": 8
           },
           {
             "id": 15,
             "name": "Guille",
             "group_number": 4,
-            "matchesPlayed": 0,
+            "matchesPlayed": 1,
             "wins": 0,
-            "losses": 0,
-            "gamesWon": 0,
-            "gamesLost": 0,
-            "gamesDiff": 0,
-            "points": 0
+            "losses": 1,
+            "gamesWon": 3,
+            "gamesLost": 6,
+            "gamesDiff": -3,
+            "points": 3
           },
           {
             "id": 16,
@@ -219,6 +219,23 @@
         ]
       },
       "matches": [
+        {
+          "id": 23,
+          "player1_id": 14,
+          "player2_id": 15,
+          "player1_games": 6,
+          "player2_games": 3,
+          "winner_id": 14,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-07-31T08:29:55.478Z",
+          "raw_input": "Carlitos 6 Guille 3",
+          "added_by": "Pablo",
+          "player1_name": "Carlitos",
+          "player2_name": "Guille",
+          "winner_name": "Carlitos",
+          "group_number": 4
+        },
         {
           "id": 22,
           "player1_id": 5,
@@ -557,7 +574,8 @@
         {
           "type": "conditional_first",
           "player": "Raul",
-          "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+          "text": "Si Raul gana a Pablo, queda primero. Si pierde 7-6, también queda primero.",
+          "styled": true
         },
         {
           "type": "conditional_safe",
@@ -603,18 +621,37 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
+          "text": "Si Carlos DM le gana a Chus 6-2 o más, y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
           "styled": true
         }
       ]
     },
     "4": {
       "confirmed": [],
-      "predictions": []
+      "predictions": [
+        {
+          "type": "conditional_first",
+          "player": "Rober",
+          "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y todavía tiene opciones de ganar el grupo.",
+          "styled": true
+        },
+        {
+          "type": "conditional_first",
+          "player": "Carlitos",
+          "text": "Si Juan gana sus 3 partidos (contra Carlitos, Guille y Rober), entonces Carlitos pierde el primer puesto.",
+          "styled": true
+        },
+        {
+          "type": "conditional_last",
+          "player": "Juan",
+          "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
+          "styled": true
+        }
+      ]
     }
   },
   "highlightsCache": {
-    "hash": "8bb104ba",
+    "hash": "b498fbcf",
     "version": 8,
     "highlights": {
       "1": {
@@ -628,7 +665,8 @@
           {
             "type": "conditional_first",
             "player": "Raul",
-            "text": "Raul será primero si gana a Pablo — e incluso si pierde 7-6, seguiría primero."
+            "text": "Si Raul gana a Pablo, queda primero. Si pierde 7-6, también queda primero.",
+            "styled": true
           },
           {
             "type": "conditional_safe",
@@ -674,18 +712,37 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también gana a Jacobo, entonces Chus pierde el primer puesto.",
+            "text": "Si Carlos DM le gana a Chus 6-2 o más, y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
             "styled": true
           }
         ]
       },
       "4": {
         "confirmed": [],
-        "predictions": []
+        "predictions": [
+          {
+            "type": "conditional_first",
+            "player": "Rober",
+            "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y todavía tiene opciones de ganar el grupo.",
+            "styled": true
+          },
+          {
+            "type": "conditional_first",
+            "player": "Carlitos",
+            "text": "Si Juan gana sus 3 partidos (contra Carlitos, Guille y Rober), entonces Carlitos pierde el primer puesto.",
+            "styled": true
+          },
+          {
+            "type": "conditional_last",
+            "player": "Juan",
+            "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
+            "styled": true
+          }
+        ]
       }
     }
   },
-  "updatedAt": "2026-07-30T14:24:43.977Z",
+  "updatedAt": "2026-07-31T08:30:01.897Z",
   "players": [
     {
       "id": 1,
@@ -774,6 +831,23 @@
     }
   ],
   "matches": [
+    {
+      "id": 23,
+      "player1_id": 14,
+      "player2_id": 15,
+      "player1_games": 6,
+      "player2_games": 3,
+      "winner_id": 14,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-07-31T08:29:55.478Z",
+      "raw_input": "Carlitos 6 Guille 3",
+      "added_by": "Pablo",
+      "player1_name": "Carlitos",
+      "player2_name": "Guille",
+      "winner_name": "Carlitos",
+      "group_number": 4
+    },
     {
       "id": 22,
       "player1_id": 5,
@@ -1266,25 +1340,25 @@
         "id": 14,
         "name": "Carlitos",
         "group_number": 4,
-        "matchesPlayed": 0,
-        "wins": 0,
+        "matchesPlayed": 1,
+        "wins": 1,
         "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "gamesWon": 6,
+        "gamesLost": 3,
+        "gamesDiff": 3,
+        "points": 8
       },
       {
         "id": 15,
         "name": "Guille",
         "group_number": 4,
-        "matchesPlayed": 0,
+        "matchesPlayed": 1,
         "wins": 0,
-        "losses": 0,
-        "gamesWon": 0,
-        "gamesLost": 0,
-        "gamesDiff": 0,
-        "points": 0
+        "losses": 1,
+        "gamesWon": 3,
+        "gamesLost": 6,
+        "gamesDiff": -3,
+        "points": 3
       },
       {
         "id": 16,
