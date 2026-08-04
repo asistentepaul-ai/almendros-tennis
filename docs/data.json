@@ -10,13 +10,25 @@
             "id": 1,
             "name": "Pepe",
             "group_number": 1,
-            "matchesPlayed": 2,
-            "wins": 2,
+            "matchesPlayed": 3,
+            "wins": 3,
             "losses": 0,
-            "gamesWon": 12,
-            "gamesLost": 2,
-            "gamesDiff": 10,
-            "points": 16
+            "gamesWon": 18,
+            "gamesLost": 6,
+            "gamesDiff": 12,
+            "points": 24
+          },
+          {
+            "id": 2,
+            "name": "Javi",
+            "group_number": 1,
+            "matchesPlayed": 2,
+            "wins": 1,
+            "losses": 1,
+            "gamesWon": 10,
+            "gamesLost": 7,
+            "gamesDiff": 3,
+            "points": 12
           },
           {
             "id": 4,
@@ -29,18 +41,6 @@
             "gamesLost": 12,
             "gamesDiff": -3,
             "points": 11
-          },
-          {
-            "id": 2,
-            "name": "Javi",
-            "group_number": 1,
-            "matchesPlayed": 1,
-            "wins": 1,
-            "losses": 0,
-            "gamesWon": 6,
-            "gamesLost": 1,
-            "gamesDiff": 5,
-            "points": 8
           },
           {
             "id": 3,
@@ -219,6 +219,23 @@
         ]
       },
       "matches": [
+        {
+          "id": 28,
+          "player1_id": 1,
+          "player2_id": 2,
+          "player1_games": 6,
+          "player2_games": 4,
+          "winner_id": 1,
+          "is_tiebreak": 0,
+          "tiebreak_score": null,
+          "played_at": "2026-08-04T16:48:45.509Z",
+          "raw_input": "Pepe ganó a Javi 6 4",
+          "added_by": "Pablo",
+          "player1_name": "Pepe",
+          "player2_name": "Javi",
+          "winner_name": "Pepe",
+          "group_number": 1
+        },
         {
           "id": 27,
           "player1_id": 2,
@@ -549,31 +566,22 @@
     "1": {
       "confirmed": [
         {
+          "type": "confirmed_first",
+          "player": "Pepe",
+          "text": "Pepe está matemáticamente clasificado como primero de grupo."
+        },
+        {
+          "type": "confirmed_last",
+          "player": "Raul",
+          "text": "Raul no puede evitar terminar último de grupo."
+        },
+        {
           "type": "safe",
-          "player": "Pablo",
-          "text": "Pablo ya no puede terminar último de grupo."
+          "player": "Javi",
+          "text": "Javi ya no puede terminar último de grupo."
         }
       ],
-      "predictions": [
-        {
-          "type": "conditional_first",
-          "player": "Pepe",
-          "text": "Si Javi gana contra Pepe y contra Raul, entonces Pepe pierde el primer puesto.",
-          "styled": true
-        },
-        {
-          "type": "conditional_safe",
-          "player": "Raul",
-          "text": "Si Raul gana contra Javi con suficiente diferencia, entonces puede escapar del último puesto.",
-          "styled": true
-        },
-        {
-          "type": "conditional_last",
-          "player": "Javi",
-          "text": "Si los partidos pendientes salen de cierta forma, entonces Javi podría caer al último puesto.",
-          "styled": true
-        }
-      ]
+      "predictions": []
     },
     "2": {
       "confirmed": [
@@ -607,7 +615,7 @@
         {
           "type": "conditional_first",
           "player": "Chus",
-          "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+          "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM gana a Jacobo, entonces Chus pierde el primer puesto.",
           "styled": true
         }
       ]
@@ -618,56 +626,47 @@
         {
           "type": "conditional_first",
           "player": "Rober",
-          "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y ganar el grupo.",
+          "text": "Si Rober gana sus partidos pendientes, entonces puede llegar a ganar el grupo aunque ahora esté último.",
           "styled": true
         },
         {
           "type": "conditional_first",
           "player": "Carlitos",
-          "text": "Si Juan gana contra Carlitos, Guille y Rober, entonces Carlitos pierde el primer puesto.",
+          "text": "Si Juan gana sus 3 partidos (contra Carlitos, Guille y Rober), entonces Carlitos pierde el primer puesto.",
           "styled": true
         },
         {
           "type": "conditional_last",
           "player": "Juan",
-          "text": "Si los resultados pendientes salen mal para Juan, puede terminar en último lugar.",
+          "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
           "styled": true
         }
       ]
     }
   },
   "highlightsCache": {
-    "hash": "c2e03e8f",
+    "hash": "485df821",
     "version": 8,
     "highlights": {
       "1": {
         "confirmed": [
           {
+            "type": "confirmed_first",
+            "player": "Pepe",
+            "text": "Pepe está matemáticamente clasificado como primero de grupo."
+          },
+          {
+            "type": "confirmed_last",
+            "player": "Raul",
+            "text": "Raul no puede evitar terminar último de grupo."
+          },
+          {
             "type": "safe",
-            "player": "Pablo",
-            "text": "Pablo ya no puede terminar último de grupo."
+            "player": "Javi",
+            "text": "Javi ya no puede terminar último de grupo."
           }
         ],
-        "predictions": [
-          {
-            "type": "conditional_first",
-            "player": "Pepe",
-            "text": "Si Javi gana contra Pepe y contra Raul, entonces Pepe pierde el primer puesto.",
-            "styled": true
-          },
-          {
-            "type": "conditional_safe",
-            "player": "Raul",
-            "text": "Si Raul gana contra Javi con suficiente diferencia, entonces puede escapar del último puesto.",
-            "styled": true
-          },
-          {
-            "type": "conditional_last",
-            "player": "Javi",
-            "text": "Si los partidos pendientes salen de cierta forma, entonces Javi podría caer al último puesto.",
-            "styled": true
-          }
-        ]
+        "predictions": []
       },
       "2": {
         "confirmed": [
@@ -701,7 +700,7 @@
           {
             "type": "conditional_first",
             "player": "Chus",
-            "text": "Si Carlos DM le gana a Chus por 6-2 o más y Carlos DM también le gana a Jacobo, entonces Chus pierde el primer puesto.",
+            "text": "Si Carlos DM le gana a Chus 6-2 o más y además Carlos DM gana a Jacobo, entonces Chus pierde el primer puesto.",
             "styled": true
           }
         ]
@@ -712,26 +711,26 @@
           {
             "type": "conditional_first",
             "player": "Rober",
-            "text": "Si Rober gana sus partidos pendientes, puede dejar de estar último y ganar el grupo.",
+            "text": "Si Rober gana sus partidos pendientes, entonces puede llegar a ganar el grupo aunque ahora esté último.",
             "styled": true
           },
           {
             "type": "conditional_first",
             "player": "Carlitos",
-            "text": "Si Juan gana contra Carlitos, Guille y Rober, entonces Carlitos pierde el primer puesto.",
+            "text": "Si Juan gana sus 3 partidos (contra Carlitos, Guille y Rober), entonces Carlitos pierde el primer puesto.",
             "styled": true
           },
           {
             "type": "conditional_last",
             "player": "Juan",
-            "text": "Si los resultados pendientes salen mal para Juan, puede terminar en último lugar.",
+            "text": "Si los resultados pendientes salen de cierta forma, entonces Juan puede terminar en último lugar.",
             "styled": true
           }
         ]
       }
     }
   },
-  "updatedAt": "2026-08-04T16:44:50.867Z",
+  "updatedAt": "2026-08-04T16:48:49.396Z",
   "players": [
     {
       "id": 1,
@@ -820,6 +819,23 @@
     }
   ],
   "matches": [
+    {
+      "id": 28,
+      "player1_id": 1,
+      "player2_id": 2,
+      "player1_games": 6,
+      "player2_games": 4,
+      "winner_id": 1,
+      "is_tiebreak": 0,
+      "tiebreak_score": null,
+      "played_at": "2026-08-04T16:48:45.509Z",
+      "raw_input": "Pepe ganó a Javi 6 4",
+      "added_by": "Pablo",
+      "player1_name": "Pepe",
+      "player2_name": "Javi",
+      "winner_name": "Pepe",
+      "group_number": 1
+    },
     {
       "id": 27,
       "player1_id": 2,
@@ -1150,13 +1166,25 @@
         "id": 1,
         "name": "Pepe",
         "group_number": 1,
-        "matchesPlayed": 2,
-        "wins": 2,
+        "matchesPlayed": 3,
+        "wins": 3,
         "losses": 0,
-        "gamesWon": 12,
-        "gamesLost": 2,
-        "gamesDiff": 10,
-        "points": 16
+        "gamesWon": 18,
+        "gamesLost": 6,
+        "gamesDiff": 12,
+        "points": 24
+      },
+      {
+        "id": 2,
+        "name": "Javi",
+        "group_number": 1,
+        "matchesPlayed": 2,
+        "wins": 1,
+        "losses": 1,
+        "gamesWon": 10,
+        "gamesLost": 7,
+        "gamesDiff": 3,
+        "points": 12
       },
       {
         "id": 4,
@@ -1169,18 +1197,6 @@
         "gamesLost": 12,
         "gamesDiff": -3,
         "points": 11
-      },
-      {
-        "id": 2,
-        "name": "Javi",
-        "group_number": 1,
-        "matchesPlayed": 1,
-        "wins": 1,
-        "losses": 0,
-        "gamesWon": 6,
-        "gamesLost": 1,
-        "gamesDiff": 5,
-        "points": 8
       },
       {
         "id": 3,
